@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Proyecto_Ingenieria.Models;
 using System.Diagnostics;
+using Proyecto.Models;
 
-namespace Proyecto_Ingenieria.Controllers
+namespace Venta_Carros.Controllers
 {
     public class HomeController : Controller
     {
@@ -14,6 +14,11 @@ namespace Proyecto_Ingenieria.Controllers
         }
 
         public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult Login()
         {
             return View();
         }
