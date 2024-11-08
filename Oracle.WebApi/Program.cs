@@ -1,6 +1,23 @@
+
+using FluentAssertions.Common;
+using Microsoft.EntityFrameworkCore;
+using Oracle.DataAccess.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
+
+
+var cadenaConexion = builder.Configuration.GetConnectionString("defaultConnection");
+builder.Services.AddDbContext<ModelContext>(x =>
+    x.UseOracle(
+    cadenaConexion,
+    options => options.UseOracleSQLCompatibility("11")
+    )
+);
+
+
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -1,0 +1,109 @@
+﻿-- Crear secuencias para simular el ID autoincremental
+CREATE SEQUENCE car_sales_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE orders_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE employees_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE cars_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE inventory_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE users_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE customers_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE invoices_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE vacation_requests_seq START WITH 1 INCREMENT BY 1;
+
+-- Tabla car_sales
+CREATE TABLE car_sales (
+  id NUMBER(19, 0) PRIMARY KEY,
+  car_model VARCHAR2(255) NOT NULL,
+  price NUMBER(10, 2) NOT NULL,
+  sale_date DATE NOT NULL,
+  customer_name VARCHAR2(255) NOT NULL
+);
+
+-- Tabla orders
+CREATE TABLE orders (
+  id NUMBER(19, 0) PRIMARY KEY,
+  order_number VARCHAR2(255) NOT NULL,
+  customer_name VARCHAR2(255) NOT NULL,
+  car_model VARCHAR2(255) NOT NULL,
+  order_status VARCHAR2(255) NOT NULL,
+  order_date DATE NOT NULL
+);
+
+-- Tabla employees
+CREATE TABLE employees (
+  id NUMBER(19, 0) PRIMARY KEY,
+  employee_name VARCHAR2(255) NOT NULL,
+  "position" VARCHAR2(255) NOT NULL,
+  salary NUMBER(10, 2) NOT NULL,
+  hire_date DATE NOT NULL,
+  last_name VARCHAR2(255) NOT NULL,
+  cedula VARCHAR2(20) UNIQUE NOT NULL,
+  phone VARCHAR2(20) NOT NULL,
+  email VARCHAR2(255) UNIQUE NOT NULL
+);
+
+-- Tabla cars
+CREATE TABLE cars (
+  id NUMBER(19, 0) PRIMARY KEY,
+  model VARCHAR2(255) NOT NULL,
+  year NUMBER(4) NOT NULL,
+  transmission VARCHAR2(255) NOT NULL,
+  color VARCHAR2(255) NOT NULL
+);
+
+-- Tabla inventory
+CREATE TABLE inventory (
+  id NUMBER(19, 0) PRIMARY KEY,
+  car_id NUMBER(19, 0) REFERENCES cars(id),
+  quantity NUMBER(10, 0) NOT NULL
+);
+
+-- Tabla users
+CREATE TABLE users (
+  id NUMBER(19, 0) PRIMARY KEY,
+  username VARCHAR2(255) NOT NULL UNIQUE,
+  password VARCHAR2(255) NOT NULL,
+  role VARCHAR2(20) CHECK (role IN ('Administrador', 'Cliente')) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  customer_id NUMBER(19, 0),
+  CONSTRAINT fk_customer FOREIGN KEY (customer_id) REFERENCES customers(id)
+);
+
+-- Tabla customers
+CREATE TABLE customers (
+  id NUMBER(19, 0) PRIMARY KEY,
+  name VARCHAR2(255) NOT NULL,
+  cedula VARCHAR2(20) UNIQUE NOT NULL,
+  birth_date DATE NOT NULL,
+  phone VARCHAR2(20) NOT NULL,
+  address VARCHAR2(255) NOT NULL
+);
+
+-- Trigger para validar datos del cliente
+CREATE OR REPLACE TRIGGER check_customer_data_trigger
+BEFORE INSERT OR UPDATE ON users
+FOR EACH ROW
+BEGIN
+  IF :NEW.role = 'Cliente' AND :NEW.customer_id IS NULL THEN
+    RAISE_APPLICATION_ERROR(-20001, 'Cliente debe tener datos en la tabla customers');
+  END IF;
+END;
+/
+
+-- Tabla invoices
+CREATE TABLE invoices (
+  id NUMBER(19, 0) PRIMARY KEY,
+  order_id NUMBER(19, 0) REFERENCES orders(id),
+  invoice_date DATE NOT NULL,
+  total_amount NUMBER(10, 2) NOT NULL,
+  status VARCHAR2(255) NOT NULL
+);
+
+-- Tabla vacation_requests
+CREATE TABLE vacation_requests (
+  id NUMBER(19, 0) PRIMARY KEY,
+  employee_id NUMBER(19, 0) REFERENCES employees(id),
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  status VARCHAR2(255) NOT NULL,
+  comments VARCHAR2(255)
+);
