@@ -10,4 +10,8 @@
     <PackageReference Include="Oracle.EntityFrameworkCore" Version="6.21.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\" />
+  </ItemGroup>
+
 </Project>

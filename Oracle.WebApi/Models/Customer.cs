@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Oracle.DataAccess.Models
+namespace Oracle.WebApi.Models
 {
     public partial class Customer
     {
@@ -18,6 +18,5 @@ namespace Oracle.DataAccess.Models
         public string Address { get; set; } = null!;
 
         public virtual ICollection<User> Users { get; set; }
-       
     }
 }

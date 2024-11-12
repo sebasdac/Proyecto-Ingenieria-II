@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Oracle.DataAccess.Models
+namespace Oracle.WebApi.Models
 {
     public partial class Inventory
     {
