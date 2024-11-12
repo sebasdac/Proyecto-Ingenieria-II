@@ -28,11 +28,13 @@ namespace Oracle.DataAccess.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+
 //            if (!optionsBuilder.IsConfigured)
 //            {
 //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
 //                optionsBuilder.UseOracle("User Id=C##Proyecto; Password=proyectoinge2; Data Source=localhost:1521/xe;");
 //            }
+
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -46,8 +48,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"CAR_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.Color)
                     .HasMaxLength(255)
@@ -75,8 +77,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"CAR_SALES_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.CarModel)
                     .HasMaxLength(255)
@@ -106,8 +108,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"CUSTOMERS_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.Address)
                     .HasMaxLength(255)
@@ -146,8 +148,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"EMPLOYEES_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.Cedula)
                     .HasMaxLength(20)
@@ -208,7 +210,9 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Car)
                     .WithMany(p => p.Inventories)
                     .HasForeignKey(d => d.CarId)
+
                     .HasConstraintName("SYS_C008399");
+
             });
 
             modelBuilder.Entity<Invoice>(entity =>
@@ -217,8 +221,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"INVOICES_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.InvoiceDate)
                     .HasColumnType("DATE")
@@ -249,8 +253,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"ORDERS_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.CarModel)
                     .HasMaxLength(255)
@@ -286,8 +290,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"USERS_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.CreatedAt)
                     .HasPrecision(6)
@@ -327,8 +331,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"VACATION_REQUESTS_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.Comments)
                     .HasMaxLength(255)
@@ -360,7 +364,7 @@ namespace Oracle.DataAccess.Models
 
             modelBuilder.HasSequence("CAR_SALES_SEQ");
 
-            modelBuilder.HasSequence("CARS_SEQ");
+            modelBuilder.HasSequence("CAR_SEQ");
 
             modelBuilder.HasSequence("CUSTOMERS_SEQ");
 
