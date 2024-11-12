@@ -26,20 +26,18 @@ namespace Oracle.DataAccess.Models
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<VacationRequest> VacationRequests { get; set; } = null!;
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-
+//        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+//        {
 //            if (!optionsBuilder.IsConfigured)
 //            {
 //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-//                optionsBuilder.UseOracle("User Id=C##Proyecto; Password=proyectoinge2; Data Source=localhost:1521/xe;");
+//                optionsBuilder.UseOracle("User Id=Proyecto;Password=proyectoinge2;Data Source=localhost:1521/orcl;");
 //            }
-
-        }
+//        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasDefaultSchema("C##PROYECTO")
+            modelBuilder.HasDefaultSchema("PROYECTO")
                 .UseCollation("USING_NLS_COMP");
 
             modelBuilder.Entity<Car>(entity =>
@@ -103,7 +101,7 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("CUSTOMERS");
 
-                entity.HasIndex(e => e.Cedula, "SYS_C008406")
+                entity.HasIndex(e => e.Cedula, "SYS_C007473")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
@@ -140,10 +138,10 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("EMPLOYEES");
 
-                entity.HasIndex(e => e.Cedula, "SYS_C008390")
+                entity.HasIndex(e => e.Cedula, "SYS_C007457")
                     .IsUnique();
 
-                entity.HasIndex(e => e.Email, "SYS_C008391")
+                entity.HasIndex(e => e.Email, "SYS_C007458")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
@@ -210,9 +208,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Car)
                     .WithMany(p => p.Inventories)
                     .HasForeignKey(d => d.CarId)
-
-                    .HasConstraintName("SYS_C008399");
-
+                    .HasConstraintName("SYS_C007502");
             });
 
             modelBuilder.Entity<Invoice>(entity =>
@@ -244,7 +240,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.Invoices)
                     .HasForeignKey(d => d.OrderId)
-                    .HasConstraintName("SYS_C008411");
+                    .HasConstraintName("SYS_C007478");
             });
 
             modelBuilder.Entity<Order>(entity =>
@@ -285,7 +281,7 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("USERS");
 
-                entity.HasIndex(e => e.Username, "SYS_C008422")
+                entity.HasIndex(e => e.Username, "SYS_C007489")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
@@ -300,7 +296,6 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.CustomerId)
                     .HasPrecision(19)
-                    .ValueGeneratedOnAdd()
                     .HasColumnName("CUSTOMER_ID");
 
                 entity.Property(e => e.Password)
@@ -311,7 +306,6 @@ namespace Oracle.DataAccess.Models
                 entity.Property(e => e.Role)
                     .HasMaxLength(20)
                     .IsUnicode(false)
-                    .ValueGeneratedOnAdd()
                     .HasColumnName("ROLE");
 
                 entity.Property(e => e.Username)
@@ -359,7 +353,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Employee)
                     .WithMany(p => p.VacationRequests)
                     .HasForeignKey(d => d.EmployeeId)
-                    .HasConstraintName("SYS_C008416");
+                    .HasConstraintName("SYS_C007483");
             });
 
             modelBuilder.HasSequence("CAR_SALES_SEQ");
