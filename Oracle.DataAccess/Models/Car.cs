@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace Oracle.DataAccess.Models
 {
@@ -17,7 +16,6 @@ namespace Oracle.DataAccess.Models
         public string Transmission { get; set; } = null!;
         public string Color { get; set; } = null!;
 
-        
         public virtual ICollection<Inventory> Inventories { get; set; }
     }
 }

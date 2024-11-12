@@ -39,64 +39,72 @@ namespace Oracle.WebApi.Controllers
 
         }
 
+        // Método HTTP POST para añadir un nuevo carro
         [HttpPost]
-        public async Task<ActionResult<Car>> Guardar([FromBody] Car car)
+        public async Task<IActionResult> Guardar([FromBody] Car car)
         {
             if (car == null)
             {
-                return BadRequest("El objeto 'car' no puede ser nulo.");
+                return BadRequest("Car object is null");
             }
 
-            // Validaciones
-            if (string.IsNullOrEmpty(car.Model) || string.IsNullOrEmpty(car.Transmission) ||
-                string.IsNullOrEmpty(car.Color) || car.Year <= 0)
+            // Validaciones adicionales de los datos
+            if (string.IsNullOrEmpty(car.Model) || car.Year <= 0)
             {
-                return BadRequest("Asegúrate de que todos los campos requeridos estén completos y sean válidos.");
+                return BadRequest("Model and Year are required fields.");
             }
 
             try
             {
-                // Agregar el carro y sus inventarios
+                // Agregar el nuevo carro a la base de datos
                 await _context.Cars.AddAsync(car);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(Guardar), new { id = car.Id }, car);
+                return StatusCode(201, car); // Devuelve el carro creado con código 201
             }
-            catch (DbUpdateException ex)
+            catch (Exception ex)
             {
-                return StatusCode(500, $"Se encontró un error al guardar el carro: {ex.Message}");
+                // Maneja excepciones durante el proceso
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
 
-
-
         [HttpPut]
-        public async Task<ActionResult<Car>> Actualizar(Car c)
+        public async Task<ActionResult<Car>> Actualizar([FromBody] Car c)
         {
             if (c == null || c.Id == 0)
             {
                 return BadRequest("Faltan Datos");
             }
 
-            Car cat = await _context.Cars.FirstOrDefaultAsync(x => x.Id == c.Id);
+            // Buscar el carro que corresponde al Id proporcionado
+            Car carExistente = await _context.Cars.FirstOrDefaultAsync(x => x.Id == c.Id);
 
-            if (cat == null)
+            // Si no se encuentra el carro, devolver NotFound
+            if (carExistente == null)
             {
                 return NotFound();
             }
 
+            // Asignar los nuevos valores a las propiedades del carro
+            carExistente.Model = c.Model;
+            carExistente.Transmission = c.Transmission;
+            carExistente.Color = c.Color;
+            carExistente.Year = c.Year;
+
+            // Guardar los cambios en la base de datos
             try
             {
-                cat.Model = c.Model;
                 await _context.SaveChangesAsync();
-                return cat;
+                return Ok(carExistente);  // Retorna el carro actualizado
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException ex)
             {
-                return StatusCode(500, "Se encontro un error");
+                return StatusCode(500, $"Se encontró un error al actualizar el carro: {ex.Message}");
             }
         }
+
         [HttpDelete("{id}")]
         public async Task<ActionResult<bool>> Eliminar(decimal id)
         {
