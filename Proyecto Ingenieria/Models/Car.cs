@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Oracle.DataAccess.Models
+namespace Proyecto_Ingenieria.Models
 {
     public partial class Car
     {

@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Oracle.DataAccess\Oracle.DataAccess.csproj" />
     <ProjectReference Include="..\Oracle.WebApi\Oracle.WebApi.csproj" />
   </ItemGroup>
 
