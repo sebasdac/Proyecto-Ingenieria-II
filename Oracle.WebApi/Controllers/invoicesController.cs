@@ -36,6 +36,45 @@ namespace Oracle.WebApi.Controllers
             return CreatedAtAction(nameof(CrearFactura), new { id = invoice.Id }, invoice);
         }
 
+        [HttpPut]//actualizar
+        public async Task<IActionResult> ActualizarFactura([FromBody] Invoice invoice)
+        {
+            if (!_context.Invoices.Any(i => i.Id == invoice.Id))
+            {
+                return BadRequest("El ID de la factura no existe.");
+            }
+
+            _context.Invoices.Update(invoice);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+        //buscar por id de factura
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> BuscarFactura(int id)
+        {
+            var invoice = await _context.Invoices.FindAsync(id);
+            if (invoice == null)
+            {
+                return NotFound();
+            }
+            return Ok(invoice);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> EliminarFactura(int id)
+        {
+            var invoice = await _context.Invoices.FindAsync(id);
+            if (invoice == null)
+            {
+                return NotFound();
+            }
+
+            _context.Invoices.Remove(invoice);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
 
     }
 }
