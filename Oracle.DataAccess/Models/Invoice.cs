@@ -5,7 +5,7 @@ namespace Oracle.DataAccess.Models
 {
     public partial class Invoice
     {
-        public long Id { get; set; }
+        public int Id { get; set; }
         public long? OrderId { get; set; }
         public DateTime InvoiceDate { get; set; }
         public decimal TotalAmount { get; set; }

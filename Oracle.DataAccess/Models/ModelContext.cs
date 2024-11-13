@@ -46,8 +46,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"CAR_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.Color)
                     .HasMaxLength(255)
@@ -75,8 +75,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"CAR_SALES_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.CarModel)
                     .HasMaxLength(255)
@@ -106,8 +106,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"CUSTOMERS_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.Address)
                     .HasMaxLength(255)
@@ -146,8 +146,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"EMPLOYEES_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.Cedula)
                     .HasMaxLength(20)
@@ -208,7 +208,9 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Car)
                     .WithMany(p => p.Inventories)
                     .HasForeignKey(d => d.CarId)
-                    .HasConstraintName("SYS_C007509");
+
+                    .HasConstraintName("SYS_C007502");
+
             });
 
             modelBuilder.Entity<Invoice>(entity =>
@@ -217,8 +219,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"INVOICES_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.InvoiceDate)
                     .HasColumnType("DATE")
@@ -249,8 +251,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"ORDERS_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.CarModel)
                     .HasMaxLength(255)
@@ -286,7 +288,10 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .HasColumnName("ID");
+
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"USERS_SEQ\".\"NEXTVAL\"");
+
 
                 entity.Property(e => e.Address)
                     .HasMaxLength(255)
@@ -320,8 +325,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"VACATION_REQUESTS_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.Comments)
                     .HasMaxLength(255)
@@ -353,7 +358,7 @@ namespace Oracle.DataAccess.Models
 
             modelBuilder.HasSequence("CAR_SALES_SEQ");
 
-            modelBuilder.HasSequence("CARS_SEQ");
+            modelBuilder.HasSequence("CAR_SEQ");
 
             modelBuilder.HasSequence("CUSTOMERS_SEQ");
 

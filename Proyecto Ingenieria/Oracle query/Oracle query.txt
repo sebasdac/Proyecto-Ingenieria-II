@@ -20,6 +20,17 @@ CREATE TABLE suppliers (
   address VARCHAR2(255)
 );
 
+
+ALTER TABLE Car_Sales MODIFY Id DEFAULT car_sales_seq.NEXTVAL;
+ALTER TABLE Orders MODIFY Id DEFAULT orders_seq.NEXTVAL;
+ALTER TABLE Employees MODIFY Id DEFAULT employees_seq.NEXTVAL;
+ALTER TABLE Cars MODIFY Id DEFAULT cars_seq.NEXTVAL;
+ALTER TABLE Inventory MODIFY Id DEFAULT inventory_seq.NEXTVAL;
+ALTER TABLE Users MODIFY Id DEFAULT users_seq.NEXTVAL;
+ALTER TABLE Customers MODIFY Id DEFAULT customers_seq.NEXTVAL;
+ALTER TABLE Invoices MODIFY Id DEFAULT invoices_seq.NEXTVAL;
+ALTER TABLE Vacation_Requests MODIFY Id DEFAULT vacation_requests_seq.NEXTVAL;
+
 -- Tabla car_sales
 CREATE TABLE car_sales (
   id NUMBER(19, 0) PRIMARY KEY,
