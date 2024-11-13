@@ -19,7 +19,7 @@ namespace Oracle.WebApi.Models
         public virtual DbSet<Car> Cars { get; set; } = null!;
         public virtual DbSet<CarSale> CarSales { get; set; } = null!;
         public virtual DbSet<Customer> Customers { get; set; } = null!;
-        public virtual DbSet<Employee> Employees { get; set; } = null!;
+        
         public virtual DbSet<Inventory> Inventories { get; set; } = null!;
         public virtual DbSet<Invoice> Invoices { get; set; } = null!;
         public virtual DbSet<Order> Orders { get; set; } = null!;
@@ -134,59 +134,7 @@ namespace Oracle.WebApi.Models
                     .HasColumnName("PHONE");
             });
 
-            modelBuilder.Entity<Employee>(entity =>
-            {
-                entity.ToTable("EMPLOYEES");
-
-                entity.HasIndex(e => e.Cedula, "SYS_C008390")
-                    .IsUnique();
-
-                entity.HasIndex(e => e.Email, "SYS_C008391")
-                    .IsUnique();
-
-                entity.Property(e => e.Id)
-                    .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
-
-                entity.Property(e => e.Cedula)
-                    .HasMaxLength(20)
-                    .IsUnicode(false)
-                    .HasColumnName("CEDULA");
-
-                entity.Property(e => e.Email)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("EMAIL");
-
-                entity.Property(e => e.EmployeeName)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("EMPLOYEE_NAME");
-
-                entity.Property(e => e.HireDate)
-                    .HasColumnType("DATE")
-                    .HasColumnName("HIRE_DATE");
-
-                entity.Property(e => e.LastName)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("LAST_NAME");
-
-                entity.Property(e => e.Phone)
-                    .HasMaxLength(20)
-                    .IsUnicode(false)
-                    .HasColumnName("PHONE");
-
-                entity.Property(e => e.Position)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("position");
-
-                entity.Property(e => e.Salary)
-                    .HasColumnType("NUMBER(10,2)")
-                    .HasColumnName("SALARY");
-            });
+            
 
             modelBuilder.Entity<Inventory>(entity =>
             {
@@ -352,10 +300,7 @@ namespace Oracle.WebApi.Models
                     .IsUnicode(false)
                     .HasColumnName("STATUS");
 
-                entity.HasOne(d => d.Employee)
-                    .WithMany(p => p.VacationRequests)
-                    .HasForeignKey(d => d.EmployeeId)
-                    .HasConstraintName("SYS_C008416");
+              
             });
 
             modelBuilder.HasSequence("CAR_SALES_SEQ");

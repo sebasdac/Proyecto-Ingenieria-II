@@ -12,7 +12,6 @@ namespace Oracle.DataAccess.Models
         public DateTime? CreatedAt { get; set; }
         public long? CustomerId { get; set; }
 
-       // public virtual Customer? Customer { get; set; }
-        //public Customer Customer { get; set; }
+        public virtual Customer? Customer { get; set; }
     }
 }

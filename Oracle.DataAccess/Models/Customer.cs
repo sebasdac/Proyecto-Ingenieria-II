@@ -18,6 +18,5 @@ namespace Oracle.DataAccess.Models
         public string Address { get; set; } = null!;
 
         public virtual ICollection<User> Users { get; set; }
-       
     }
 }

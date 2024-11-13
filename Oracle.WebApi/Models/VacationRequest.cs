@@ -12,6 +12,6 @@ namespace Oracle.WebApi.Models
         public string Status { get; set; } = null!;
         public string? Comments { get; set; }
 
-        public virtual Employee? Employee { get; set; }
+      
     }
 }
