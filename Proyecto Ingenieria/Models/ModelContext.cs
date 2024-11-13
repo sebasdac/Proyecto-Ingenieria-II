@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace Oracle.DataAccess.Models
+namespace Proyecto_Ingenieria.Models
 {
     public partial class ModelContext : DbContext
     {
@@ -26,14 +26,14 @@ namespace Oracle.DataAccess.Models
         public virtual DbSet<Supplier> Suppliers { get; set; } = null!;
         public virtual DbSet<VacationRequest> VacationRequests { get; set; } = null!;
 
-//        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-//        {
-//            if (!optionsBuilder.IsConfigured)
-//            {
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-//                optionsBuilder.UseOracle("User Id=Proyecto;Password=proyectoinge2;Data Source=localhost:1521/orcl;");
-//            }
-//        }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseOracle("User Id=Proyecto;Password=proyectoinge2;Data Source=localhost:1521/orcl;");
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -46,8 +46,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("\"PROYECTO\".\"CAR_SEQ\".\"NEXTVAL\"");
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.Color)
                     .HasMaxLength(255)
@@ -75,8 +75,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("\"PROYECTO\".\"CAR_SALES_SEQ\".\"NEXTVAL\"");
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.CarModel)
                     .HasMaxLength(255)
@@ -106,8 +106,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("\"PROYECTO\".\"CUSTOMERS_SEQ\".\"NEXTVAL\"");
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.Address)
                     .HasMaxLength(255)
@@ -146,8 +146,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("\"PROYECTO\".\"EMPLOYEES_SEQ\".\"NEXTVAL\"");
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.Cedula)
                     .HasMaxLength(20)
@@ -208,9 +208,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Car)
                     .WithMany(p => p.Inventories)
                     .HasForeignKey(d => d.CarId)
-
-                    .HasConstraintName("SYS_C007502");
-
+                    .HasConstraintName("SYS_C007509");
             });
 
             modelBuilder.Entity<Invoice>(entity =>
@@ -219,8 +217,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("\"PROYECTO\".\"INVOICES_SEQ\".\"NEXTVAL\"");
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.InvoiceDate)
                     .HasColumnType("DATE")
@@ -251,8 +249,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("\"PROYECTO\".\"ORDERS_SEQ\".\"NEXTVAL\"");
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.CarModel)
                     .HasMaxLength(255)
@@ -288,10 +286,7 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("\"PROYECTO\".\"USERS_SEQ\".\"NEXTVAL\"");
-
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.Address)
                     .HasMaxLength(255)
@@ -325,8 +320,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("\"PROYECTO\".\"VACATION_REQUESTS_SEQ\".\"NEXTVAL\"");
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.Comments)
                     .HasMaxLength(255)
@@ -358,7 +353,7 @@ namespace Oracle.DataAccess.Models
 
             modelBuilder.HasSequence("CAR_SALES_SEQ");
 
-            modelBuilder.HasSequence("CAR_SEQ");
+            modelBuilder.HasSequence("CARS_SEQ");
 
             modelBuilder.HasSequence("CUSTOMERS_SEQ");
 
