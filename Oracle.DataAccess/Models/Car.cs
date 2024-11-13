@@ -12,11 +12,10 @@ namespace Oracle.DataAccess.Models
 
         public long Id { get; set; }
         public string Model { get; set; } = null!;
-        public int Year { get; set; }
+        public byte Year { get; set; }
         public string Transmission { get; set; } = null!;
         public string Color { get; set; } = null!;
 
         public virtual ICollection<Inventory> Inventories { get; set; }
-        //
     }
 }
