@@ -17,5 +17,6 @@ namespace Oracle.DataAccess.Models
         public string Color { get; set; } = null!;
 
         public virtual ICollection<Inventory> Inventories { get; set; }
+        //
     }
 }
