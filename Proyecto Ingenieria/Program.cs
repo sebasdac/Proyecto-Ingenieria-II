@@ -7,15 +7,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 
-var cadenaConexion = builder.Configuration.GetConnectionString("defaultConnection");
-builder.Services.AddDbContext<ModelContext>(x =>
-    x.UseOracle(
-    cadenaConexion,
-    options => options.UseOracleSQLCompatibility("11")
-    )
-);
-
-
 
 
 builder.Services.AddControllers();
