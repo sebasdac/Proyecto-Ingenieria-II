@@ -46,8 +46,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("\"PROYECTO\".\"CAR_SEQ\".\"NEXTVAL\"");
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.Color)
                     .HasMaxLength(255)
@@ -75,8 +75,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("\"PROYECTO\".\"CAR_SALES_SEQ\".\"NEXTVAL\"");
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.CarModel)
                     .HasMaxLength(255)
@@ -101,13 +101,13 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("CUSTOMERS");
 
-                entity.HasIndex(e => e.Cedula, "SYS_C007473")
+                entity.HasIndex(e => e.Cedula, "SYS_C007476")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("\"PROYECTO\".\"CUSTOMERS_SEQ\".\"NEXTVAL\"");
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.Address)
                     .HasMaxLength(255)
@@ -138,16 +138,16 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("EMPLOYEES");
 
-                entity.HasIndex(e => e.Cedula, "SYS_C007457")
+                entity.HasIndex(e => e.Cedula, "SYS_C007460")
                     .IsUnique();
 
-                entity.HasIndex(e => e.Email, "SYS_C007458")
+                entity.HasIndex(e => e.Email, "SYS_C007461")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("\"PROYECTO\".\"EMPLOYEES_SEQ\".\"NEXTVAL\"");
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.Cedula)
                     .HasMaxLength(20)
@@ -208,7 +208,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Car)
                     .WithMany(p => p.Inventories)
                     .HasForeignKey(d => d.CarId)
-                    .HasConstraintName("SYS_C007502");
+                    .HasConstraintName("SYS_C007469");
             });
 
             modelBuilder.Entity<Invoice>(entity =>
@@ -217,8 +217,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("\"PROYECTO\".\"INVOICES_SEQ\".\"NEXTVAL\"");
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.InvoiceDate)
                     .HasColumnType("DATE")
@@ -240,7 +240,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.Invoices)
                     .HasForeignKey(d => d.OrderId)
-                    .HasConstraintName("SYS_C007478");
+                    .HasConstraintName("SYS_C007488");
             });
 
             modelBuilder.Entity<Order>(entity =>
@@ -249,8 +249,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("\"PROYECTO\".\"ORDERS_SEQ\".\"NEXTVAL\"");
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.CarModel)
                     .HasMaxLength(255)
@@ -281,13 +281,13 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("USERS");
 
-                entity.HasIndex(e => e.Username, "SYS_C007489")
+                entity.HasIndex(e => e.Username, "SYS_C007482")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("\"PROYECTO\".\"USERS_SEQ\".\"NEXTVAL\"");
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.CreatedAt)
                     .HasPrecision(6)
@@ -296,6 +296,7 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.CustomerId)
                     .HasPrecision(19)
+                    .ValueGeneratedOnAdd()
                     .HasColumnName("CUSTOMER_ID");
 
                 entity.Property(e => e.Password)
@@ -306,6 +307,7 @@ namespace Oracle.DataAccess.Models
                 entity.Property(e => e.Role)
                     .HasMaxLength(20)
                     .IsUnicode(false)
+                    .ValueGeneratedOnAdd()
                     .HasColumnName("ROLE");
 
                 entity.Property(e => e.Username)
@@ -325,8 +327,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("\"PROYECTO\".\"VACATION_REQUESTS_SEQ\".\"NEXTVAL\"");
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.Comments)
                     .HasMaxLength(255)
@@ -353,12 +355,12 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Employee)
                     .WithMany(p => p.VacationRequests)
                     .HasForeignKey(d => d.EmployeeId)
-                    .HasConstraintName("SYS_C007483");
+                    .HasConstraintName("SYS_C007493");
             });
 
             modelBuilder.HasSequence("CAR_SALES_SEQ");
 
-            modelBuilder.HasSequence("CAR_SEQ");
+            modelBuilder.HasSequence("CARS_SEQ");
 
             modelBuilder.HasSequence("CUSTOMERS_SEQ");
 
@@ -369,6 +371,8 @@ namespace Oracle.DataAccess.Models
             modelBuilder.HasSequence("INVOICES_SEQ");
 
             modelBuilder.HasSequence("ORDERS_SEQ");
+
+            modelBuilder.HasSequence("SUPPLIERS_SEQ");
 
             modelBuilder.HasSequence("USERS_SEQ");
 
