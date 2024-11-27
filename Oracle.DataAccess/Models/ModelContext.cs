@@ -16,8 +16,11 @@ namespace Oracle.DataAccess.Models
         {
         }
 
+        public virtual DbSet<Accessory> Accessories { get; set; } = null!;
         public virtual DbSet<Car> Cars { get; set; } = null!;
         public virtual DbSet<CarSale> CarSales { get; set; } = null!;
+        public virtual DbSet<Cart> Carts { get; set; } = null!;
+        public virtual DbSet<Cartitem> Cartitems { get; set; } = null!;
         public virtual DbSet<Customer> Customers { get; set; } = null!;
         public virtual DbSet<Employee> Employees { get; set; } = null!;
         public virtual DbSet<Inventory> Inventories { get; set; } = null!;
@@ -40,14 +43,41 @@ namespace Oracle.DataAccess.Models
             modelBuilder.HasDefaultSchema("PROYECTO")
                 .UseCollation("USING_NLS_COMP");
 
+            modelBuilder.Entity<Accessory>(entity =>
+            {
+                entity.ToTable("ACCESSORIES");
+
+                entity.Property(e => e.Id)
+                    .HasColumnType("NUMBER")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("ID");
+
+                entity.Property(e => e.Cost)
+                    .HasColumnType("NUMBER(10,2)")
+                    .HasColumnName("COST");
+
+                entity.Property(e => e.Description)
+                    .HasColumnType("CLOB")
+                    .HasColumnName("DESCRIPTION");
+
+                entity.Property(e => e.Name)
+                    .HasMaxLength(255)
+                    .IsUnicode(false)
+                    .HasColumnName("NAME");
+
+                entity.Property(e => e.Quantity)
+                    .HasColumnType("NUMBER")
+                    .HasColumnName("QUANTITY");
+            });
+
             modelBuilder.Entity<Car>(entity =>
             {
                 entity.ToTable("CARS");
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"CAR_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.Color)
                     .HasMaxLength(255)
@@ -75,8 +105,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"CAR_SALES_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.CarModel)
                     .HasMaxLength(255)
@@ -97,17 +127,73 @@ namespace Oracle.DataAccess.Models
                     .HasColumnName("SALE_DATE");
             });
 
+            modelBuilder.Entity<Cart>(entity =>
+            {
+                entity.ToTable("CARTS");
+
+                entity.Property(e => e.Cartid)
+                    .HasColumnType("NUMBER")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("CARTID");
+
+                entity.Property(e => e.Createddate)
+                    .HasPrecision(6)
+                    .HasColumnName("CREATEDDATE")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP\n");
+
+                entity.Property(e => e.Userid)
+                    .HasColumnType("NUMBER")
+                    .HasColumnName("USERID");
+            });
+
+            modelBuilder.Entity<Cartitem>(entity =>
+            {
+                entity.ToTable("CARTITEMS");
+
+                entity.Property(e => e.Cartitemid)
+                    .HasColumnType("NUMBER")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("CARTITEMID");
+
+                entity.Property(e => e.Cartid)
+                    .HasColumnType("NUMBER")
+                    .HasColumnName("CARTID");
+
+                entity.Property(e => e.Price)
+                    .HasColumnType("NUMBER(10,2)")
+                    .HasColumnName("PRICE");
+
+                entity.Property(e => e.Productid)
+                    .HasColumnType("NUMBER")
+                    .HasColumnName("PRODUCTID");
+
+                entity.Property(e => e.Producttype)
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("PRODUCTTYPE");
+
+                entity.Property(e => e.Quantity)
+                    .HasColumnType("NUMBER")
+                    .HasColumnName("QUANTITY");
+
+                entity.HasOne(d => d.Cart)
+                    .WithMany(p => p.Cartitems)
+                    .HasForeignKey(d => d.Cartid)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_CARTITEMS_CARTS");
+            });
+
             modelBuilder.Entity<Customer>(entity =>
             {
                 entity.ToTable("CUSTOMERS");
 
-                entity.HasIndex(e => e.Cedula, "SYS_C007476")
+                entity.HasIndex(e => e.Cedula, "SYS_C007473")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"CUSTOMERS_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.Address)
                     .HasMaxLength(255)
@@ -138,16 +224,16 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("EMPLOYEES");
 
-                entity.HasIndex(e => e.Cedula, "SYS_C007460")
+                entity.HasIndex(e => e.Cedula, "SYS_C007457")
                     .IsUnique();
 
-                entity.HasIndex(e => e.Email, "SYS_C007461")
+                entity.HasIndex(e => e.Email, "SYS_C007458")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"EMPLOYEES_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.Cedula)
                     .HasMaxLength(20)
@@ -208,7 +294,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Car)
                     .WithMany(p => p.Inventories)
                     .HasForeignKey(d => d.CarId)
-                    .HasConstraintName("SYS_C007469");
+                    .HasConstraintName("SYS_C007502");
             });
 
             modelBuilder.Entity<Invoice>(entity =>
@@ -217,8 +303,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"INVOICES_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.InvoiceDate)
                     .HasColumnType("DATE")
@@ -240,7 +326,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.Invoices)
                     .HasForeignKey(d => d.OrderId)
-                    .HasConstraintName("SYS_C007488");
+                    .HasConstraintName("SYS_C007478");
             });
 
             modelBuilder.Entity<Order>(entity =>
@@ -249,8 +335,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"ORDERS_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.CarModel)
                     .HasMaxLength(255)
@@ -281,13 +367,17 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("USERS");
 
-                entity.HasIndex(e => e.Username, "SYS_C007482")
+                entity.HasIndex(e => e.Username, "SYS_C007489")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"USERS_SEQ\".\"NEXTVAL\"");
+
+                entity.Property(e => e.Cartid)
+                    .HasColumnType("NUMBER")
+                    .HasColumnName("CARTID");
 
                 entity.Property(e => e.CreatedAt)
                     .HasPrecision(6)
@@ -296,7 +386,6 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.CustomerId)
                     .HasPrecision(19)
-                    .ValueGeneratedOnAdd()
                     .HasColumnName("CUSTOMER_ID");
 
                 entity.Property(e => e.Password)
@@ -307,13 +396,17 @@ namespace Oracle.DataAccess.Models
                 entity.Property(e => e.Role)
                     .HasMaxLength(20)
                     .IsUnicode(false)
-                    .ValueGeneratedOnAdd()
                     .HasColumnName("ROLE");
 
                 entity.Property(e => e.Username)
                     .HasMaxLength(255)
                     .IsUnicode(false)
                     .HasColumnName("USERNAME");
+
+                entity.HasOne(d => d.Cart)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.Cartid)
+                    .HasConstraintName("FK_USER_CART");
 
                 entity.HasOne(d => d.Customer)
                     .WithMany(p => p.Users)
@@ -327,8 +420,8 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"VACATION_REQUESTS_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.Comments)
                     .HasMaxLength(255)
@@ -355,12 +448,12 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Employee)
                     .WithMany(p => p.VacationRequests)
                     .HasForeignKey(d => d.EmployeeId)
-                    .HasConstraintName("SYS_C007493");
+                    .HasConstraintName("SYS_C007483");
             });
 
             modelBuilder.HasSequence("CAR_SALES_SEQ");
 
-            modelBuilder.HasSequence("CARS_SEQ");
+            modelBuilder.HasSequence("CAR_SEQ");
 
             modelBuilder.HasSequence("CUSTOMERS_SEQ");
 
@@ -371,8 +464,6 @@ namespace Oracle.DataAccess.Models
             modelBuilder.HasSequence("INVOICES_SEQ");
 
             modelBuilder.HasSequence("ORDERS_SEQ");
-
-            modelBuilder.HasSequence("SUPPLIERS_SEQ");
 
             modelBuilder.HasSequence("USERS_SEQ");
 
