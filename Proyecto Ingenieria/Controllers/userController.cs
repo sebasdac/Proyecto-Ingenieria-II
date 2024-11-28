@@ -6,6 +6,14 @@ namespace Proyecto.Controllers
     {
         public IActionResult Index()
         {
+            // Obtener datos del usuario desde el token
+            var userId = User.FindFirst("UserId")?.Value; // ID del usuario
+            var username = User.Identity.Name; // Nombre del usuario
+
+            // Pasar datos a la vista
+            ViewBag.Username = username;
+            ViewBag.UserId = userId;
+
             return View();
         }
         public IActionResult Charts()
