@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Oracle.DataAccess.Models;
-
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,28 @@ builder.Services.AddDbContext<ModelContext>(x => x.UseOracle(
     cadenaConexion,
     options => options.UseOracleSQLCompatibility("11")
 ));
+
+// Configurar autenticación con JWT
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var secretKey = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(secretKey)
+    };
+});
 
 // Agregar controladores
 builder.Services.AddControllers();
@@ -43,6 +67,8 @@ app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 
+// Usar autenticación y autorización
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

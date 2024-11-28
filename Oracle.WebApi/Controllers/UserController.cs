@@ -3,18 +3,24 @@ using Microsoft.AspNetCore.Mvc;
 using Oracle.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace Oracle.WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-   
     public class UserController : ControllerBase
     {
-        private ModelContext _context;
-        public UserController(ModelContext context)
+        private readonly ModelContext _context;
+        private readonly IConfiguration _configuration;
+
+        public UserController(ModelContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         [HttpOptions]
@@ -27,8 +33,60 @@ namespace Oracle.WebApi.Controllers
             return Ok();
         }
 
+        // Login API
+        [HttpPost("Login")]
+        public IActionResult Login([FromBody] User loginRequest)
+        {
+            if (string.IsNullOrEmpty(loginRequest.Username) || string.IsNullOrEmpty(loginRequest.Password))
+            {
+                return BadRequest("El nombre de usuario y la contraseña son obligatorios.");
+            }
 
-        [HttpGet]
+            // Buscar el usuario en la base de datos
+            var user = _context.Users.FirstOrDefault(u => u.Username == loginRequest.Username);
+
+            if (user == null || user.Password != loginRequest.Password)
+            {
+                return Unauthorized("Usuario o contraseña incorrectos.");
+            }
+
+            // Generar el token JWT
+            var token = GenerateJwtToken(user);
+
+            return Ok(new { Token = token });
+        }
+
+        // Método para generar el token JWT
+        private string GenerateJwtToken(User user)
+        {
+            // Definir los claims (información adicional en el token)
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Username),
+                new Claim("role", user.Role),
+                new Claim("userId", user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            // Obtener la llave secreta del archivo appsettings.json
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            // Configurar el token
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(2), // Expiración del token
+                signingCredentials: creds
+            );
+
+            // Serializar el token a string
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+    
+
+    [HttpGet]
         public async Task<IActionResult> ListarUser()
         {
             try
@@ -56,9 +114,11 @@ namespace Oracle.WebApi.Controllers
                 return BadRequest("El objeto 'user' no puede ser nulo.");
             }
 
-            if (string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.Password))
+            if (string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.Password) ||
+                string.IsNullOrEmpty(user.Role) || (user.Role != "Administrador" && user.Role != "Cliente") ||
+                (user.CustomerId.HasValue && user.CustomerId <= 0))
             {
-                return BadRequest("El nombre de usuario y la contraseña son obligatorios.");
+                return BadRequest("Datos incompletos o inválidos.");
             }
 
             var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == user.Username);
@@ -79,14 +139,7 @@ namespace Oracle.WebApi.Controllers
             }
         }
 
-
-
-
-
-
-
-        [HttpGet("{id}")]//buscar por id
-
+        [HttpGet("{id}")]
         public async Task<ActionResult<User>> BuscarPorId(long id)
         {
             var retorno = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
@@ -99,32 +152,23 @@ namespace Oracle.WebApi.Controllers
             {
                 return NotFound();
             }
-
         }
-        
-
-
 
         [HttpPut]
-        public async Task<ActionResult<Employee>> Actualizar(User c)
+        public async Task<ActionResult<User>> Actualizar(User c)
         {
             if (c == null || c.Id == 0)
             {
                 return BadRequest("Faltan Datos");
             }
 
-
-            // Buscar el usuario por Id
             User user = await _context.Users.FindAsync(c.Id);
-
-
 
             if (user == null)
             {
                 return NotFound("Usuario no encontrado.");
             }
 
-            // Validación de los campos antes de la actualización
             if (string.IsNullOrEmpty(c.Username) || string.IsNullOrEmpty(c.Password) ||
                 string.IsNullOrEmpty(c.Role) || (c.Role != "Administrador" && c.Role != "Cliente") ||
                 (c.CustomerId.HasValue && c.CustomerId <= 0))
@@ -132,33 +176,27 @@ namespace Oracle.WebApi.Controllers
                 return BadRequest("Datos incompletos o inválidos.");
             }
 
-
-
             try
             {
-               
                 user.Username = c.Username;
                 user.Password = c.Password;
                 user.Role = c.Role;
-                user.CustomerId = c.CustomerId; 
+                user.CustomerId = c.CustomerId;
 
-                // Guardar los cambios
                 await _context.SaveChangesAsync();
 
                 return Ok(new
                 {
                     Message = "Usuario actualizado correctamente",
-                    User = user 
+                    User = user
                 });
             }
             catch (DbUpdateException ex)
             {
-                // Manejo de excepción si ocurre un error al guardar los cambios
                 return StatusCode(500, $"Error en la base de datos: {ex.Message}");
             }
             catch (Exception ex)
             {
-                // Manejo de otras excepciones
                 return StatusCode(500, $"Se encontró un error: {ex.Message}");
             }
         }
@@ -179,10 +217,15 @@ namespace Oracle.WebApi.Controllers
                 await _context.SaveChangesAsync();
                 return true;
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException ex)
             {
-                return StatusCode(500, "Se encontro un error");
+                return StatusCode(500, $"Error en la base de datos: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Se encontró un error: {ex.Message}");
             }
         }
     }
 }
+
