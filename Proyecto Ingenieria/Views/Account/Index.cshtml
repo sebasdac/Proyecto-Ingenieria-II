@@ -125,7 +125,7 @@
                     localStorage.setItem('token', response.token);
                     alert('Login exitoso');
                     // Redirigir a una página protegida o dashboard
-                    window.location.href = '/dashboard'; // Redirige donde necesites
+                    window.location.href = '/User/Index';
                 },
                 error: function (xhr, status, error) {
                     console.error('Error al iniciar sesión:', error);
