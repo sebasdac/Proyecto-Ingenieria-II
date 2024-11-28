@@ -26,6 +26,7 @@ namespace Oracle.DataAccess.Models
         public virtual DbSet<Inventory> Inventories { get; set; } = null!;
         public virtual DbSet<Invoice> Invoices { get; set; } = null!;
         public virtual DbSet<Order> Orders { get; set; } = null!;
+        public virtual DbSet<Supplier> Suppliers { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<VacationRequest> VacationRequests { get; set; } = null!;
 
@@ -187,7 +188,7 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("CUSTOMERS");
 
-                entity.HasIndex(e => e.Cedula, "SYS_C007476")
+                entity.HasIndex(e => e.Cedula, "SYS_C007516")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
@@ -224,10 +225,10 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("EMPLOYEES");
 
-                entity.HasIndex(e => e.Cedula, "SYS_C007460")
+                entity.HasIndex(e => e.Cedula, "SYS_C007500")
                     .IsUnique();
 
-                entity.HasIndex(e => e.Email, "SYS_C007461")
+                entity.HasIndex(e => e.Email, "SYS_C007501")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
@@ -294,7 +295,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Car)
                     .WithMany(p => p.Inventories)
                     .HasForeignKey(d => d.CarId)
-                    .HasConstraintName("SYS_C007469");
+                    .HasConstraintName("SYS_C007509");
             });
 
             modelBuilder.Entity<Invoice>(entity =>
@@ -326,7 +327,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.Invoices)
                     .HasForeignKey(d => d.OrderId)
-                    .HasConstraintName("SYS_C007488");
+                    .HasConstraintName("SYS_C007521");
             });
 
             modelBuilder.Entity<Order>(entity =>
@@ -363,11 +364,48 @@ namespace Oracle.DataAccess.Models
                     .HasColumnName("ORDER_STATUS");
             });
 
+            modelBuilder.Entity<Supplier>(entity =>
+            {
+                entity.ToTable("SUPPLIERS");
+
+                entity.HasIndex(e => e.Email, "SYS_C007479")
+                    .IsUnique();
+
+                entity.Property(e => e.Id)
+                    .HasPrecision(19)
+                    .HasColumnName("ID");
+
+                entity.Property(e => e.Address)
+                    .HasMaxLength(255)
+                    .IsUnicode(false)
+                    .HasColumnName("ADDRESS");
+
+                entity.Property(e => e.ContactName)
+                    .HasMaxLength(255)
+                    .IsUnicode(false)
+                    .HasColumnName("CONTACT_NAME");
+
+                entity.Property(e => e.Email)
+                    .HasMaxLength(255)
+                    .IsUnicode(false)
+                    .HasColumnName("EMAIL");
+
+                entity.Property(e => e.Phone)
+                    .HasMaxLength(20)
+                    .IsUnicode(false)
+                    .HasColumnName("PHONE");
+
+                entity.Property(e => e.SupplierName)
+                    .HasMaxLength(255)
+                    .IsUnicode(false)
+                    .HasColumnName("SUPPLIER_NAME");
+            });
+
             modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("USERS");
 
-                entity.HasIndex(e => e.Username, "SYS_C007520")
+                entity.HasIndex(e => e.Username, "SYS_C007599")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
@@ -434,7 +472,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Employee)
                     .WithMany(p => p.VacationRequests)
                     .HasForeignKey(d => d.EmployeeId)
-                    .HasConstraintName("SYS_C007493");
+                    .HasConstraintName("SYS_C007526");
             });
 
             modelBuilder.HasSequence("CAR_SALES_SEQ");
