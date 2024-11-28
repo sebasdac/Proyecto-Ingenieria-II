@@ -2,11 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Oracle.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Cors;
 
 namespace Oracle.WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+   
     public class UserController : ControllerBase
     {
         private ModelContext _context;
@@ -15,7 +17,18 @@ namespace Oracle.WebApi.Controllers
             _context = context;
         }
 
-                [HttpGet]
+        [HttpOptions]
+        [Route("")]
+        public IActionResult Options()
+        {
+            Response.Headers.Add("Access-Control-Allow-Origin", "https://localhost:7214");
+            Response.Headers.Add("Access-Control-Allow-Methods", "POST, OPTIONS");
+            Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type");
+            return Ok();
+        }
+
+
+        [HttpGet]
         public async Task<IActionResult> ListarUser()
         {
             try
@@ -34,6 +47,40 @@ namespace Oracle.WebApi.Controllers
                 return StatusCode(500, $"Error al obtener los usuarios: {ex.Message}");
             }
         }
+
+        [HttpPost]
+        public async Task<ActionResult<User>> Guardar([FromBody] User user)
+        {
+            if (user == null)
+            {
+                return BadRequest("El objeto 'user' no puede ser nulo.");
+            }
+
+            if (string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.Password))
+            {
+                return BadRequest("El nombre de usuario y la contraseña son obligatorios.");
+            }
+
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == user.Username);
+            if (existingUser != null)
+            {
+                return BadRequest("El nombre de usuario ya está en uso.");
+            }
+
+            try
+            {
+                await _context.Users.AddAsync(user);
+                await _context.SaveChangesAsync();
+                return CreatedAtAction(nameof(Guardar), new { id = user.Id }, user);
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(500, $"Error en la base de datos: {ex.Message}");
+            }
+        }
+
+
+
 
 
 
@@ -54,48 +101,8 @@ namespace Oracle.WebApi.Controllers
             }
 
         }
+        
 
-        [HttpPost]
-        public async Task<ActionResult<User>> Guardar([FromBody] User user)
-        {
-            if (user == null)
-            {
-                return BadRequest("El objeto 'user' no puede ser nulo.");
-            }
-
-            // Validaciones
-            // Validaciones
-            if (string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.Password))
-            {
-                return BadRequest("El nombre de usuario y la contraseña son obligatorios.");
-            }
-
-            if (user.CustomerId <= 0)
-            {
-                return BadRequest("El ID de cliente no es válido.");
-            }
-            var existingUser = await _context.Users
-                                  .FirstOrDefaultAsync(u => u.Username == user.Username);
-            if (existingUser != null)
-            {
-                return BadRequest("El nombre de usuario ya está en uso.");
-            }
-
-            try
-            {
-                // Agregar el usuario
-                await _context.Users.AddAsync(user);
-                await _context.SaveChangesAsync();
-
-                return CreatedAtAction(nameof(Guardar), new { id = user.Id }, user);
-            }
-            catch (DbUpdateException ex)
-            {
-
-                var innerException = ex.InnerException?.Message;
-                return StatusCode(500, $"Error en la base de datos: {innerException ?? ex.Message}");
-            }
-        }
 
 
         [HttpPut]

@@ -1,0 +1,123 @@
+﻿/* styles.css */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #333;
+}
+
+.container {
+    display: flex;
+    width: 900px;
+    height: 600px;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.form-container {
+    flex: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.form-wrapper {
+    width: 100%;
+    display: flex;
+    transition: transform 0.5s ease;
+}
+
+form {
+    width: 100%;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.login-form {
+    transform: translateX(0);
+}
+
+.register-form {
+    transform: translateX(100%);
+}
+
+.input-group {
+    margin-bottom: 1.5rem;
+    width: 100%;
+}
+
+    .input-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        color: #333;
+    }
+
+        .input-group input:focus {
+            border-color: #6a11cb;
+            outline: none;
+            box-shadow: 0 0 4px rgba(106, 17, 203, 0.2);
+        }
+
+.btn {
+    width: 100%;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #fff;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+    .btn:hover {
+        background: linear-gradient(135deg, #2575fc, #6a11cb);
+    }
+
+.toggle-form {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+    .toggle-form a {
+        color: #6a11cb;
+        text-decoration: none;
+    }
+
+        .toggle-form a:hover {
+            text-decoration: underline;
+        }
+
+.side-panel {
+    flex: 1;
+    background: linear-gradient(135deg, #2575fc, #6a11cb);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+}

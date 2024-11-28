@@ -1,31 +1,45 @@
-
-using FluentAssertions.Common;
 using Microsoft.EntityFrameworkCore;
 using Oracle.DataAccess.Models;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
-
-
-
+// Configuración de conexión a la base de datos
 var cadenaConexion = builder.Configuration.GetConnectionString("defaultConnection");
-builder.Services.AddDbContext<ModelContext>(x =>
-    x.UseOracle(cadenaConexion)
-);
+builder.Services.AddDbContext<ModelContext>(x => x.UseOracle(
+    cadenaConexion,
+    options => options.UseOracleSQLCompatibility("11")
+));
 
+// Agregar controladores
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// Configurar Swagger para documentación
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Configuración de CORS: permitir cualquier origen (solo para desarrollo)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin() // Permitir cualquier origen
+              .AllowAnyMethod() // Permitir cualquier método (GET, POST, etc.)
+              .AllowAnyHeader(); // Permitir cualquier cabecera
+    });
+});
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configuración del pipeline de solicitudes HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Aplicar CORS
+app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 
