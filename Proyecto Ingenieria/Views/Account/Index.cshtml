@@ -65,6 +65,7 @@
             $('.login-form').show();
         });
 
+        // Manejo del formulario de registro (ya implementado)
         $('#registerForm').on('submit', function (e) {
             e.preventDefault(); // Evitar el envío por defecto del formulario
 
@@ -93,17 +94,49 @@
                 },
                 error: function (xhr, status, error) {
                     console.error('Error al registrar:', error);
-                    console.log('Detalles del error:', xhr.responseText);  // Esto te dará más detalles sobre el error.
                     alert('Hubo un problema al registrar el usuario');
                 }
             });
-
         });
 
+        // Manejo del formulario de login con AJAX
+        $('#loginForm').on('submit', function (e) {
+            e.preventDefault(); // Evitar el envío por defecto del formulario
 
+            // Obtener los valores del formulario
+            var username = $('#login-email').val();
+            var password = $('#login-password').val();
+
+            // Crear el objeto JSON
+            var data = {
+                "username": username,
+                "password": password,
+                "role": 'Cliente'
+            };
+
+            $.ajax({
+                url: 'https://localhost:7277/api/User/Login', // API para login
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (response) {
+                    console.log('Login exitoso:', response);
+                    // Almacenar el token JWT en localStorage o sessionStorage
+                    localStorage.setItem('token', response.token);
+                    alert('Login exitoso');
+                    // Redirigir a una página protegida o dashboard
+                    window.location.href = '/dashboard'; // Redirige donde necesites
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error al iniciar sesión:', error);
+                    alert('Usuario o contraseña incorrectos');
+                }
+            });
+        });
 
     </script>
 
     <script src="~/AccountTemplate/js/script.js"></script>
 </body>
 </html>
+
