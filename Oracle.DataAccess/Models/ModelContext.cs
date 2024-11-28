@@ -16,8 +16,11 @@ namespace Oracle.DataAccess.Models
         {
         }
 
+        public virtual DbSet<Accessory> Accessories { get; set; } = null!;
         public virtual DbSet<Car> Cars { get; set; } = null!;
         public virtual DbSet<CarSale> CarSales { get; set; } = null!;
+        public virtual DbSet<Cart> Carts { get; set; } = null!;
+        public virtual DbSet<Cartitem> Cartitems { get; set; } = null!;
         public virtual DbSet<Customer> Customers { get; set; } = null!;
         public virtual DbSet<Employee> Employees { get; set; } = null!;
         public virtual DbSet<Inventory> Inventories { get; set; } = null!;
@@ -39,6 +42,33 @@ namespace Oracle.DataAccess.Models
         {
             modelBuilder.HasDefaultSchema("PROYECTO")
                 .UseCollation("USING_NLS_COMP");
+
+            modelBuilder.Entity<Accessory>(entity =>
+            {
+                entity.ToTable("ACCESSORIES");
+
+                entity.Property(e => e.Id)
+                    .HasColumnType("NUMBER")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("ID");
+
+                entity.Property(e => e.Cost)
+                    .HasColumnType("NUMBER(10,2)")
+                    .HasColumnName("COST");
+
+                entity.Property(e => e.Description)
+                    .HasColumnType("CLOB")
+                    .HasColumnName("DESCRIPTION");
+
+                entity.Property(e => e.Name)
+                    .HasMaxLength(255)
+                    .IsUnicode(false)
+                    .HasColumnName("NAME");
+
+                entity.Property(e => e.Quantity)
+                    .HasColumnType("NUMBER")
+                    .HasColumnName("QUANTITY");
+            });
 
             modelBuilder.Entity<Car>(entity =>
             {
@@ -95,6 +125,62 @@ namespace Oracle.DataAccess.Models
                 entity.Property(e => e.SaleDate)
                     .HasColumnType("DATE")
                     .HasColumnName("SALE_DATE");
+            });
+
+            modelBuilder.Entity<Cart>(entity =>
+            {
+                entity.ToTable("CARTS");
+
+                entity.Property(e => e.Cartid)
+                    .HasColumnType("NUMBER")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("CARTID");
+
+                entity.Property(e => e.Createddate)
+                    .HasPrecision(6)
+                    .HasColumnName("CREATEDDATE")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP\n   ");
+
+                entity.Property(e => e.Userid)
+                    .HasColumnType("NUMBER")
+                    .HasColumnName("USERID");
+            });
+
+            modelBuilder.Entity<Cartitem>(entity =>
+            {
+                entity.ToTable("CARTITEMS");
+
+                entity.Property(e => e.Cartitemid)
+                    .HasColumnType("NUMBER")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("CARTITEMID");
+
+                entity.Property(e => e.Cartid)
+                    .HasColumnType("NUMBER")
+                    .HasColumnName("CARTID");
+
+                entity.Property(e => e.Price)
+                    .HasColumnType("NUMBER(10,2)")
+                    .HasColumnName("PRICE");
+
+                entity.Property(e => e.Productid)
+                    .HasColumnType("NUMBER")
+                    .HasColumnName("PRODUCTID");
+
+                entity.Property(e => e.Producttype)
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("PRODUCTTYPE");
+
+                entity.Property(e => e.Quantity)
+                    .HasColumnType("NUMBER")
+                    .HasColumnName("QUANTITY");
+
+                entity.HasOne(d => d.Cart)
+                    .WithMany(p => p.Cartitems)
+                    .HasForeignKey(d => d.Cartid)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_CARTITEMS_CARTS");
             });
 
             modelBuilder.Entity<Customer>(entity =>
@@ -281,13 +367,13 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("USERS");
 
-                entity.HasIndex(e => e.Username, "SYS_C007482")
+                entity.HasIndex(e => e.Username, "SYS_C007520")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
                     .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                    .HasColumnName("ID")
+                    .HasDefaultValueSql("\"PROYECTO\".\"USERS_SEQ\".\"NEXTVAL\"");
 
                 entity.Property(e => e.CreatedAt)
                     .HasPrecision(6)
@@ -296,7 +382,6 @@ namespace Oracle.DataAccess.Models
 
                 entity.Property(e => e.CustomerId)
                     .HasPrecision(19)
-                    .ValueGeneratedOnAdd()
                     .HasColumnName("CUSTOMER_ID");
 
                 entity.Property(e => e.Password)
@@ -307,18 +392,12 @@ namespace Oracle.DataAccess.Models
                 entity.Property(e => e.Role)
                     .HasMaxLength(20)
                     .IsUnicode(false)
-                    .ValueGeneratedOnAdd()
                     .HasColumnName("ROLE");
 
                 entity.Property(e => e.Username)
                     .HasMaxLength(255)
                     .IsUnicode(false)
                     .HasColumnName("USERNAME");
-
-                entity.HasOne(d => d.Customer)
-                    .WithMany(p => p.Users)
-                    .HasForeignKey(d => d.CustomerId)
-                    .HasConstraintName("FK_CUSTOMER");
             });
 
             modelBuilder.Entity<VacationRequest>(entity =>
@@ -359,6 +438,8 @@ namespace Oracle.DataAccess.Models
             });
 
             modelBuilder.HasSequence("CAR_SALES_SEQ");
+
+            modelBuilder.HasSequence("CAR_SEQ");
 
             modelBuilder.HasSequence("CARS_SEQ");
 

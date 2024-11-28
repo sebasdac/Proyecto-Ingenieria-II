@@ -1,15 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-public class AccountController : Controller
+namespace Proyecto_Ingenieria.Controllers
 {
-    // Acción para mostrar la vista de inicio de sesión
-    public IActionResult Login()
+    public class AccountController : Controller
     {
-        return View(); // Esto buscará la vista Login.cshtml en Views/Account/
-    }
-
-    public  IActionResult register()
-    {
-        return View();
+        public IActionResult Index()
+        {
+            return View();
+        }
     }
 }
