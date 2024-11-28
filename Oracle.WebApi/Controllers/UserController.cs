@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-
+using BCrypt.Net;  
 namespace Oracle.WebApi.Controllers
 {
     [Route("api/[controller]")]
@@ -33,7 +33,8 @@ namespace Oracle.WebApi.Controllers
             return Ok();
         }
 
-        // Login API
+      
+
         [HttpPost("Login")]
         public IActionResult Login([FromBody] User loginRequest)
         {
@@ -45,16 +46,25 @@ namespace Oracle.WebApi.Controllers
             // Buscar el usuario en la base de datos
             var user = _context.Users.FirstOrDefault(u => u.Username == loginRequest.Username);
 
-            if (user == null || user.Password != loginRequest.Password)
+            if (user == null)
             {
                 return Unauthorized("Usuario o contraseña incorrectos.");
             }
 
-            // Generar el token JWT
+            // Verificar si la contraseña ingresada coincide con el hash de la contraseña almacenada
+            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(loginRequest.Password, user.Password);
+
+            if (!isPasswordValid)
+            {
+                return Unauthorized("Usuario o contraseña incorrectos.");
+            }
+
+            // Generar el token JWT si la contraseña es válida
             var token = GenerateJwtToken(user);
 
             return Ok(new { Token = token });
         }
+
 
         // Método para generar el token JWT
         private string GenerateJwtToken(User user)
@@ -115,29 +125,58 @@ namespace Oracle.WebApi.Controllers
             }
 
             if (string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.Password) ||
-                string.IsNullOrEmpty(user.Role) || (user.Role != "Administrador" && user.Role != "Cliente") ||
-                (user.CustomerId.HasValue && user.CustomerId <= 0))
+                string.IsNullOrEmpty(user.Role) || (user.Role != "Administrador" && user.Role != "Cliente"))
             {
                 return BadRequest("Datos incompletos o inválidos.");
             }
 
+            if (user.Customer == null)
+            {
+                return BadRequest("Los datos del cliente son requeridos.");
+            }
+
+            // Validar si el username ya existe
             var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == user.Username);
             if (existingUser != null)
             {
                 return BadRequest("El nombre de usuario ya está en uso.");
             }
+            user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
 
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
+                // Crear el cliente
+                var newCustomer = new Customer
+                {
+                    Name = user.Customer.Name,
+                    Cedula = user.Customer.Cedula,
+                    BirthDate = user.Customer.BirthDate,
+                    Phone = user.Customer.Phone,
+                    Address = user.Customer.Address
+                };
+
+                await _context.Customers.AddAsync(newCustomer);
+                await _context.SaveChangesAsync();
+
+                // Asociar el cliente al usuario
+                user.CustomerId = newCustomer.Id;
+                user.Customer = null; // Evitar problemas de referencia circular
+
+                // Crear el usuario
                 await _context.Users.AddAsync(user);
                 await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
                 return CreatedAtAction(nameof(Guardar), new { id = user.Id }, user);
             }
-            catch (DbUpdateException ex)
+            catch (Exception ex)
             {
-                return StatusCode(500, $"Error en la base de datos: {ex.Message}");
+                await transaction.RollbackAsync();
+                return StatusCode(500, $"Error al guardar los datos: {ex.Message}");
             }
         }
+
 
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> BuscarPorId(long id)
