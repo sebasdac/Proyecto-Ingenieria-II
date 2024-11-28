@@ -8,7 +8,6 @@ namespace Oracle.DataAccess.Models
         public Cart()
         {
             Cartitems = new HashSet<Cartitem>();
-            Users = new HashSet<User>();
         }
 
         public decimal Cartid { get; set; }
@@ -16,6 +15,5 @@ namespace Oracle.DataAccess.Models
         public DateTime? Createddate { get; set; }
 
         public virtual ICollection<Cartitem> Cartitems { get; set; }
-        public virtual ICollection<User> Users { get; set; }
     }
 }

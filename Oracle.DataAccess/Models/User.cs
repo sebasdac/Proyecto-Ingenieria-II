@@ -11,9 +11,5 @@ namespace Oracle.DataAccess.Models
         public string Role { get; set; } = null!;
         public DateTime? CreatedAt { get; set; }
         public long? CustomerId { get; set; }
-        public decimal? Cartid { get; set; }
-
-        public virtual Cart? Cart { get; set; }
-        public virtual Customer? Customer { get; set; }
     }
 }
