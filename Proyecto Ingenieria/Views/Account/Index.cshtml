@@ -40,9 +40,30 @@
                         <label for="register-password">Contraseña</label>
                         <input type="password" id="register-password" placeholder="••••••••" required>
                     </div>
+                    <div class="input-group">
+                        <label for="register-name">Nombre Completo</label>
+                        <input type="text" id="register-name" placeholder="Tu nombre completo" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="register-cedula">Cédula</label>
+                        <input type="text" id="register-cedula" placeholder="12345678" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="register-birthdate">Fecha de Nacimiento</label>
+                        <input type="date" id="register-birthdate" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="register-phone">Teléfono</label>
+                        <input type="text" id="register-phone" placeholder="Número de teléfono" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="register-address">Dirección</label>
+                        <textarea id="register-address" placeholder="Tu dirección" required></textarea>
+                    </div>
                     <button type="submit" class="btn">Registrar</button>
                     <p class="toggle-form">¿Ya tienes una cuenta? <a href="#" id="show-login">Iniciar Sesión</a></p>
                 </form>
+
 
             </div>
         </div>
@@ -65,22 +86,30 @@
             $('.login-form').show();
         });
 
-        // Manejo del formulario de registro (ya implementado)
         $('#registerForm').on('submit', function (e) {
             e.preventDefault(); // Evitar el envío por defecto del formulario
 
             // Obtener los valores del formulario
             var username = $('#register-email').val();
             var password = $('#register-password').val();
-            var role = 'Cliente'; // Puedes cambiar esto según sea necesario
-            var createdAt = new Date().toISOString(); // Fecha y hora actual en formato ISO
+            var name = $('#register-name').val();
+            var cedula = $('#register-cedula').val();
+            var birthDate = $('#register-birthdate').val();
+            var phone = $('#register-phone').val();
+            var address = $('#register-address').val();
 
             // Crear el objeto JSON
             var data = {
                 "username": username,
                 "password": password,
-                "role": 'Cliente',
-                "createdAt": createdAt
+                "role": 'Cliente', // Fijo para registro de clientes
+                "customer": {
+                    "name": name,
+                    "cedula": cedula,
+                    "birthDate": birthDate,
+                    "phone": phone,
+                    "address": address
+                }
             };
 
             $.ajax({
@@ -91,6 +120,9 @@
                 success: function (response) {
                     console.log('Usuario registrado con éxito:', response);
                     alert('Registro exitoso');
+                    // Redirigir al login o dashboard
+                    $('.register-form').hide();
+                    $('.login-form').show();
                 },
                 error: function (xhr, status, error) {
                     console.error('Error al registrar:', error);
@@ -98,6 +130,7 @@
                 }
             });
         });
+
 
         // Manejo del formulario de login con AJAX
         $('#loginForm').on('submit', function (e) {
