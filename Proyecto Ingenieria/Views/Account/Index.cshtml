@@ -113,22 +113,39 @@
             };
 
             $.ajax({
-                url: 'https://localhost:7277/api/User',
+                url: 'https://localhost:7277/api/User/Login', // URL de tu endpoint de login
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify(data),
+                data: JSON.stringify(data), // 'data' debe incluir 'username' y 'password'
                 success: function (response) {
-                    console.log('Usuario registrado con éxito:', response);
-                    alert('Registro exitoso');
-                    // Redirigir al login o dashboard
-                    $('.register-form').hide();
-                    $('.login-form').show();
+                    console.log('Login exitoso:', response);
+
+                    // Almacenar el token JWT en localStorage
+                    const token = response.Token; // Asegúrate de que el backend devuelva el token con esta clave
+                    localStorage.setItem('token', token);
+
+                    // Decodificar el token usando jwt-decode
+                    const decoded = jwt_decode(token);
+
+                    // Extraer los datos necesarios del token
+                    const name = decoded.name;
+                    const cedula = decoded.cedula;
+                    const phone = decoded.phone;
+                    const address = decoded.address;
+
+                    // Mostrar los datos en la consola o utilizarlos en la página
+                    console.log(`Usuario: ${name}, Cédula: ${cedula}, Teléfono: ${phone}, Dirección: ${address}`);
+                    alert(`Bienvenido, ${name}`);
+
+                    // Redirigir a una página protegida o dashboard
+                    window.location.href = '/dashboard.html'; // Cambia según tu lógica
                 },
                 error: function (xhr, status, error) {
-                    console.error('Error al registrar:', error);
-                    alert('Hubo un problema al registrar el usuario');
+                    console.error('Error al iniciar sesión:', error);
+                    alert('Usuario o contraseña incorrectos');
                 }
             });
+
         });
 
 

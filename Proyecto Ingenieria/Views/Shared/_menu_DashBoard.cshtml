@@ -14,7 +14,7 @@
                             <span class="count bg-success"></span>
                         </div>
                         <div class="profile-name">
-                            <h5 class="mb-0 font-weight-normal">@ViewBag.Username</h5>
+                            <h5 id="usernameDisplay" class="mb-0 font-weight-normal"></h5>
                             <span>Silver Member</span>
                         </div>
                     </div>
@@ -118,3 +118,26 @@
 
         </ul>
     </nav>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+<script>
+        // Obtener el token del localStorage
+        const token = localStorage.getItem('token');
+
+        if (token) {
+            // Decodificar el token usando jwt-decode
+            const decodedToken = jwt_decode(token);
+
+            // Extraer el nombre del usuario desde el claim "sub" (o el campo que usaste)
+            const username = decodedToken.sub; // O el campo correspondiente
+            const name = decodedToken.name;
+
+            // Mostrar el nombre del usuario en la página
+            document.getElementById('usernameDisplay').innerText = `Hola, ${name}`;
+        } else {
+            // Manejar el caso donde no hay token (redireccionar al login, mostrar mensaje, etc.)
+            alert('No estás autenticado. Por favor, inicia sesión.');
+            window.location.href = '/login.html';
+        }
+
+
+</script>

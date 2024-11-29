@@ -33,7 +33,7 @@ namespace Oracle.WebApi.Controllers
             return Ok();
         }
 
-      
+
 
         [HttpPost("Login")]
         public IActionResult Login([FromBody] User loginRequest)
@@ -59,24 +59,36 @@ namespace Oracle.WebApi.Controllers
                 return Unauthorized("Usuario o contraseña incorrectos.");
             }
 
-            // Generar el token JWT si la contraseña es válida
-            var token = GenerateJwtToken(user);
+            // Obtener datos del cliente relacionados al usuario
+            var customer = _context.Customers.FirstOrDefault(c => c.Id == user.CustomerId);
+            if (customer == null)
+            {
+                return Unauthorized("No se encontraron los datos del cliente.");
+            }
+
+            // Generar el token JWT incluyendo los datos adicionales del cliente
+            var token = GenerateJwtToken(user, customer);
 
             return Ok(new { Token = token });
         }
 
 
+
         // Método para generar el token JWT
-        private string GenerateJwtToken(User user)
+        private string GenerateJwtToken(User user, Customer customer)
         {
             // Definir los claims (información adicional en el token)
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Username),
-                new Claim("role", user.Role),
-                new Claim("userId", user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
+        new Claim(JwtRegisteredClaimNames.Sub, user.Username),
+        new Claim("role", user.Role),
+        new Claim("userId", user.Id.ToString()),
+        new Claim("name", customer.Name), // Nombre del cliente
+        new Claim("cedula", customer.Cedula), // Cédula
+        new Claim("phone", customer.Phone), // Teléfono
+        new Claim("address", customer.Address), // Dirección
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+    };
 
             // Obtener la llave secreta del archivo appsettings.json
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
@@ -94,9 +106,10 @@ namespace Oracle.WebApi.Controllers
             // Serializar el token a string
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-    
 
-    [HttpGet]
+
+
+        [HttpGet]
         public async Task<IActionResult> ListarUser()
         {
             try
