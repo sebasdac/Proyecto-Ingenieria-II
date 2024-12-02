@@ -18,7 +18,9 @@ namespace Oracle.DataAccess.Models
 
         public virtual DbSet<Accessory> Accessories { get; set; } = null!;
         public virtual DbSet<Car> Cars { get; set; } = null!;
+        public virtual DbSet<CarColor> CarColors { get; set; } = null!;
         public virtual DbSet<CarSale> CarSales { get; set; } = null!;
+        public virtual DbSet<CarTransmission> CarTransmissions { get; set; } = null!;
         public virtual DbSet<Cart> Carts { get; set; } = null!;
         public virtual DbSet<Cartitem> Cartitems { get; set; } = null!;
         public virtual DbSet<Customer> Customers { get; set; } = null!;
@@ -75,28 +77,42 @@ namespace Oracle.DataAccess.Models
                 entity.ToTable("CARS");
 
                 entity.Property(e => e.Id)
-                    .HasPrecision(19)
-                    .HasColumnName("ID")
-                    .HasDefaultValueSql("\"PROYECTO\".\"CAR_SEQ\".\"NEXTVAL\"");
-
-                entity.Property(e => e.Color)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("COLOR");
+                    .HasColumnType("NUMBER")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.Model)
-                    .HasMaxLength(255)
+                    .HasMaxLength(100)
                     .IsUnicode(false)
                     .HasColumnName("MODEL");
-
-                entity.Property(e => e.Transmission)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("TRANSMISSION");
 
                 entity.Property(e => e.Year)
                     .HasPrecision(4)
                     .HasColumnName("YEAR");
+            });
+
+            modelBuilder.Entity<CarColor>(entity =>
+            {
+                entity.ToTable("CAR_COLORS");
+
+                entity.Property(e => e.Id)
+                    .HasColumnType("NUMBER")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("ID");
+
+                entity.Property(e => e.CarId)
+                    .HasColumnType("NUMBER")
+                    .HasColumnName("CAR_ID");
+
+                entity.Property(e => e.Color)
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("COLOR");
+
+                entity.HasOne(d => d.Car)
+                    .WithMany(p => p.CarColors)
+                    .HasForeignKey(d => d.CarId)
+                    .HasConstraintName("FK_CAR_COLORS_CAR");
             });
 
             modelBuilder.Entity<CarSale>(entity =>
@@ -125,6 +141,30 @@ namespace Oracle.DataAccess.Models
                 entity.Property(e => e.SaleDate)
                     .HasColumnType("DATE")
                     .HasColumnName("SALE_DATE");
+            });
+
+            modelBuilder.Entity<CarTransmission>(entity =>
+            {
+                entity.ToTable("CAR_TRANSMISSIONS");
+
+                entity.Property(e => e.Id)
+                    .HasColumnType("NUMBER")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("ID");
+
+                entity.Property(e => e.CarId)
+                    .HasColumnType("NUMBER")
+                    .HasColumnName("CAR_ID");
+
+                entity.Property(e => e.Transmission)
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("TRANSMISSION");
+
+                entity.HasOne(d => d.Car)
+                    .WithMany(p => p.CarTransmissions)
+                    .HasForeignKey(d => d.CarId)
+                    .HasConstraintName("FK_CAR_TRANSMISSIONS_CAR");
             });
 
             modelBuilder.Entity<Cart>(entity =>
@@ -276,25 +316,21 @@ namespace Oracle.DataAccess.Models
 
             modelBuilder.Entity<Inventory>(entity =>
             {
-                entity.ToTable("INVENTORY");
+                entity.HasNoKey();
 
-                entity.Property(e => e.Id)
-                    .HasPrecision(19)
-                    .ValueGeneratedNever()
-                    .HasColumnName("ID");
+                entity.ToTable("INVENTORY");
 
                 entity.Property(e => e.CarId)
                     .HasPrecision(19)
                     .HasColumnName("CAR_ID");
 
+                entity.Property(e => e.Id)
+                    .HasPrecision(19)
+                    .HasColumnName("ID");
+
                 entity.Property(e => e.Quantity)
                     .HasPrecision(10)
                     .HasColumnName("QUANTITY");
-
-                entity.HasOne(d => d.Car)
-                    .WithMany(p => p.Inventories)
-                    .HasForeignKey(d => d.CarId)
-                    .HasConstraintName("SYS_C007502");
             });
 
             modelBuilder.Entity<Invoice>(entity =>
