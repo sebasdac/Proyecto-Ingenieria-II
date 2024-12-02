@@ -1,0 +1,149 @@
+﻿@{
+    Layout = null;
+    var carId = ViewBag.CarId;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Purchase Section</title>
+    <link rel="stylesheet" href="~/PurchaseSection/css/style.css">
+</head>
+<body>
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="preloader-content">
+            <img src="~/StoreTemplate/images/logo-default.png" alt="Tesla Logo" class="preloader-logo">
+        </div>
+    </div>
+    <div class="container">
+        <div class="car-preview">
+            <img id="car-image" src="/images/placeholder.jpg" alt="Car Image" class="car-image">
+        </div>
+        <div class="purchase-section">
+            <div class="scrollable">
+                <h1 id="car-model">Loading...</h1>
+
+                <!-- Colores -->
+                <div class="color-picker">
+                    <h2>Color</h2>
+                    <div id="colors" class="colors">
+                        <!-- Los botones de colores se cargarán dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Transmisiones -->
+                <div class="transmission-picker">
+                    <h2>Transmission</h2>
+                    <div id="transmissions" class="transmissions">
+                        <!-- Las opciones de transmisión se cargarán dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Año -->
+                <div class="year-picker">
+                    <h2>Year</h2>
+                    <p id="car-year">Loading...</p>
+                </div>
+            </div>
+            <div class="order">
+                <button class="order-button">Order Now</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const carId = @carId; // Obtener el ID desde el controlador
+
+        function showPreloader() {
+            document.getElementById('preloader').style.display = 'flex';
+        }
+
+        // Función para ocultar el preloader
+        function hidePreloader() {
+            preloader.style.opacity = "0"; // Suaviza la desaparición
+            preloader.style.transition = "opacity 0.5s ease"; // Efecto de desvanecimiento
+
+            // Elimina el preloader del flujo después de la transición
+            setTimeout(() => {
+                preloader.style.display = "none";
+                content.style.display = "block"; // Muestra el contenido principal
+            }, 500)
+        }
+
+        async function loadCarData(carId) {
+            try {
+                showPreloader();
+                // Llamar a la API para obtener los datos del coche
+                const response = await fetch(`https://localhost:7277/api/Car/${carId}`);
+                // Supongamos que 'car.model' contiene el nombre del modelo
+                
+
+                if (!response.ok) {
+                    throw new Error('Car not found');
+                }
+
+                const car = await response.json();
+
+                hidePreloader();
+
+                // Actualizar el modelo, año y imagen del coche
+                document.getElementById('car-model').innerText = car.model;
+                document.getElementById('car-year').innerText = car.year;
+                document.getElementById('car-image').src = `/images/${car.model.replace(/\s/g, '-')}.jpg`;
+
+                // Limpiar contenedores para evitar duplicados
+                const colorsContainer = document.getElementById('colors');
+                colorsContainer.innerHTML = ''; // Limpiar contenido previo
+                const transmissionsContainer = document.getElementById('transmissions');
+                transmissionsContainer.innerHTML = ''; // Limpiar contenido previo
+
+                // Renderizar colores
+                car.carColors.$values.forEach(color => {
+                    const button = document.createElement('button');
+                    button.classList.add('color-option');
+                    button.innerText = color.color; // Mostrar el nombre del color
+                    button.style.backgroundColor = color.color.toLowerCase(); // Asignar el color al fondo
+                    button.style.color = color.color.toLowerCase() === 'white' ? 'black' : 'white'; // Ajustar el color del texto si es blanco
+                    button.addEventListener('click', () => {
+                        document.querySelector('.color-option.selected')?.classList.remove('selected');
+                        button.classList.add('selected');
+                    });
+                    colorsContainer.appendChild(button);
+                });
+
+                // Renderizar transmisiones
+                car.carTransmissions.$values.forEach(transmission => {
+                    const button = document.createElement('button');
+                    button.classList.add('transmission-option');
+                    button.innerText = transmission.transmission; // Usar el tipo de transmisión
+                    button.addEventListener('click', () => {
+                        document.querySelector('.transmission-option.selected')?.classList.remove('selected');
+                        button.classList.add('selected');
+                    });
+                    transmissionsContainer.appendChild(button);
+                });
+                //imagenes
+                // Obtener el modelo del coche de los datos de la API
+                const modelName = car.model.toLowerCase().replace(/\s+/g, '-'); // Convierte a minúsculas y reemplaza espacios por guiones
+                const imageUrl = `/PurchaseSection/images/${modelName}.jpg`; // Construye la ruta dinámica de la imagen
+
+                // Asignar la URL generada al elemento de la imagen
+                const carImageElement = document.getElementById('car-image');
+                carImageElement.src = imageUrl;
+                carImageElement.alt = `${car.model} Image`; // Añade un texto alternativo descriptivo
+
+
+
+            } catch (error) {
+                console.error('Error loading car data:', error);
+                alert('Failed to load car data. Please try again.');
+            }
+        }
+        loadCarData(carId);
+
+    </script>
+</body>
+</html>
