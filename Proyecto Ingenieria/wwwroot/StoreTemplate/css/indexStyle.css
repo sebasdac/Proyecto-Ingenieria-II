@@ -121,7 +121,7 @@ nav a {
 
 /* Cybertruck Section */
 .cybertruck {
-    background-image: url('../images/Homepage-Model-X-Desktop-US.avif');
+    background-image: url('../images/Homepage-Model-S-Desktop-US.avif');
     background-size: cover;
     background-position: center;
     height: 100vh; /* Altura completa de la ventana */
@@ -200,54 +200,129 @@ footer {
     }
 }
 
-/* Header */
+/* Header general */
 .transparent-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: absolute; /* Ubicación absoluta para superponer al fondo */
+    position: absolute;
     top: 0;
-    width: 100%; /* Ocupa todo el ancho de la pantalla */
-    padding: 1rem 2rem; /* Espaciado interno */
-    background-color: rgba(0, 0, 0, 0.2); /* Fondo transparente */
-    z-index: 10; /* Asegura que esté sobre otros elementos */
+    width: 100%;
+    padding: 1rem 2rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    z-index: 10;
 }
 
     .transparent-header .logo img {
-        height: 24px; /* Tamaño del logo */
+        height: 24px;
     }
 
     .transparent-header nav ul {
         display: flex;
-        list-style: none; /* Sin viñetas */
-        gap: 2rem; /* Espacio entre los elementos del menú */
+        list-style: none;
+        gap: 2rem;
     }
 
     .transparent-header nav a {
-        color: #fff; /* Texto blanco */
-        text-decoration: none; /* Sin subrayado */
+        color: #fff;
+        text-decoration: none;
         font-weight: bold;
-        font-size: 1rem; /* Tamaño de la fuente */
-        transition: color 0.3s; /* Animación para el cambio de color */
+        font-size: 1rem;
+        transition: color 0.3s;
     }
 
         .transparent-header nav a:hover {
-            color: #ccc; /* Cambia el color al pasar el ratón */
+            color: #ccc;
         }
 
     .transparent-header .icons {
         display: flex;
-        gap: 1.5rem; /* Espacio entre los íconos */
+        gap: 1.5rem;
     }
 
     .transparent-header .icon svg {
-        height: 20px; /* Tamaño de los íconos */
+        height: 20px;
         width: 20px;
-        fill: #fff; /* Color blanco */
-        transition: opacity 0.3s, fill 0.3s; /* Animación para hover */
     }
 
-    .transparent-header .icon:hover svg {
-        fill: #ccc; /* Cambiar a gris claro al pasar el ratón */
-        opacity: 0.8; /* Reducir la opacidad */
+/* Botón del menú hamburguesa */
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+    .menu-toggle svg {
+        fill: #fff;
     }
+
+/* Configuración del menú móvil */
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block;
+    }
+
+    nav.menu {
+        display: none; /* Oculta el menú por defecto */
+        flex-direction: column;
+        background-color: rgba(0, 0, 0, 0.9);
+        position: absolute;
+        top: 100%;
+        right: 0;
+        width: 100%;
+        padding: 1rem 0;
+        z-index: 9;
+    }
+
+        nav.menu ul {
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav.menu a {
+            font-size: 1.2rem;
+        }
+
+        nav.menu.active {
+            display: flex; /* Muestra el menú cuando se activa */
+        }
+}
+
+/* Preloader */
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000; /* Fondo negro */
+    z-index: 9999; /* Encima de todo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.preloader-content {
+    text-align: center;
+}
+
+.preloader-logo {
+    width: 150px; /* Ajusta el tamaño del logo */
+    animation: spin 2s linear infinite; /* Efecto de giro (opcional) */
+}
+
+/* Animación de giro */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
