@@ -1,4 +1,5 @@
 using FluentAssertions.Common;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Oracle.DataAccess.Models;
 
@@ -18,7 +19,16 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+// Registrar el tipo MIME para .avif
+var provider = new FileExtensionContentTypeProvider();
+provider.Mappings[".avif"] = "image/avif"; // Configuración del tipo MIME
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    ContentTypeProvider = provider // Agregar el proveedor de tipos MIME
+});
+
+
 
 app.UseRouting();
 
