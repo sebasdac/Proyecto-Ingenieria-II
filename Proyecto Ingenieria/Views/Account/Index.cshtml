@@ -11,6 +11,12 @@
     <link rel="stylesheet" href="~/AccountTemplate/css/styles.css">
 </head>
 <body>
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="preloader-content">
+            <img src="~/StoreTemplate/images/logo-default.png" alt="Tesla Logo" class="preloader-logo">
+        </div>
+    </div>
     <div class="container">
         <div class="form-container">
             <div class="form-wrapper">
@@ -25,7 +31,11 @@
                         <label for="login-password">Contraseña</label>
                         <input type="password" id="login-password" placeholder="••••••••" required>
                     </div>
-                    <button type="submit" class="btn">Ingresar</button>
+                    <button type="submit" class="btn" id="login-button">
+                        <span class="btn-text">Ingresar</span>
+                        <div class="spinner" style="display: none;"></div> <!-- Spinner oculto por defecto -->
+                    </button>
+
                     <p class="toggle-form">¿No tienes una cuenta? <a href="#" id="show-register">Regístrate</a></p>
                 </form>
 
@@ -60,7 +70,11 @@
                         <label for="register-address">Dirección</label>
                         <textarea id="register-address" placeholder="Tu dirección" required></textarea>
                     </div>
-                    <button type="submit" class="btn">Registrar</button>
+                    <button type="submit" class="btn" id="register-form">
+                        <span class="btn-text">Registrarse</span>
+                        <div class="spinner" style="display: none;"></div>
+                    </button>
+
                     <p class="toggle-form">¿Ya tienes una cuenta? <a href="#" id="show-login">Iniciar Sesión</a></p>
                 </form>
 
@@ -113,12 +127,12 @@
             };
 
             $.ajax({
-                url: 'https://localhost:7277/api/User/Login', // URL de tu endpoint de login
+                url: 'https://localhost:7277/api/User/', // URL de tu endpoint de login
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(data), // 'data' debe incluir 'username' y 'password'
                 success: function (response) {
-                    console.log('Login exitoso:', response);
+                    
 
                     // Almacenar el token JWT en localStorage
                     const token = response.Token; // Asegúrate de que el backend devuelva el token con esta clave
@@ -153,6 +167,8 @@
         $('#loginForm').on('submit', function (e) {
             e.preventDefault(); // Evitar el envío por defecto del formulario
 
+            $('#login-button .btn-text').hide(); // Oculta el texto del botón
+            $('#login-button .spinner').show();
             // Obtener los valores del formulario
             var username = $('#login-email').val();
             var password = $('#login-password').val();
@@ -173,10 +189,14 @@
                     console.log('Login exitoso:', response);
                     // Almacenar el token JWT en localStorage o sessionStorage
                     localStorage.setItem('token', response.token);
-                    alert('Login exitoso');
+                    
                     // Redirigir a una página protegida o dashboard
                     window.location.href = '/User/Index';
                 },
+                complete: function () {
+                    $('#login-button .spinner').hide();
+                    $('#login-button .btn-text').show()
+                 },
                 error: function (xhr, status, error) {
                     console.error('Error al iniciar sesión:', error);
                     alert('Usuario o contraseña incorrectos');
@@ -184,6 +204,26 @@
             });
         });
 
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const preloader = document.getElementById("preloader");
+
+        // Espera a que la página termine de cargarse
+        window.addEventListener("load", () => {
+          // Retraso adicional antes de iniciar la animación de desvanecimiento
+          setTimeout(() => {
+            preloader.style.opacity = "0"; // Suaviza la desaparición
+            preloader.style.transition = "opacity 0.5s ease"; // Efecto de desvanecimiento
+
+            // Espera hasta que la transición de opacidad termine para eliminar el preloader
+            setTimeout(() => {
+              preloader.style.display = "none"; // Elimina el preloader del flujo
+            }, 500); // Tiempo para completar la transición de opacidad
+          }, 1000); // Retraso adicional de 1 segundo
+        });
+      });
     </script>
 
     <script src="~/AccountTemplate/js/script.js"></script>
