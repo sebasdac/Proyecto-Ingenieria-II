@@ -50,6 +50,7 @@
             </div>
             <div class="order">
                 <button class="order-button">Order Now</button>
+                <span id="selected-price" class="price-display"></span>
             </div>
         </div>
     </div>
@@ -76,73 +77,99 @@
         async function loadCarData(carId) {
             try {
                 showPreloader();
+
                 // Llamar a la API para obtener los datos del coche
                 const response = await fetch(`https://localhost:7277/api/Car/${carId}`);
-                // Supongamos que 'car.model' contiene el nombre del modelo
-                
 
                 if (!response.ok) {
                     throw new Error('Car not found');
                 }
 
                 const car = await response.json();
-
                 hidePreloader();
 
-                // Actualizar el modelo, año y imagen del coche
+                // Actualizar el modelo, año y la imagen del coche
                 document.getElementById('car-model').innerText = car.model;
                 document.getElementById('car-year').innerText = car.year;
-                document.getElementById('car-image').src = `/images/${car.model.replace(/\s/g, '-')}.jpg`;
+
+                const carImageElement = document.getElementById('car-image');
+                const modelName = car.model.toLowerCase().replace(/\s+/g, '-');
+                carImageElement.src = `/PurchaseSection/images/${modelName}.jpg`;
+                carImageElement.alt = `${car.model} Image`;
 
                 // Limpiar contenedores para evitar duplicados
                 const colorsContainer = document.getElementById('colors');
-                colorsContainer.innerHTML = ''; // Limpiar contenido previo
+                colorsContainer.innerHTML = ''; // Limpiar colores previos
                 const transmissionsContainer = document.getElementById('transmissions');
-                transmissionsContainer.innerHTML = ''; // Limpiar contenido previo
+                transmissionsContainer.innerHTML = ''; // Limpiar transmisiones previas
 
-                // Renderizar colores
-                car.carColors.$values.forEach(color => {
-                    const button = document.createElement('button');
-                    button.classList.add('color-option');
-                    button.innerText = color.color; // Mostrar el nombre del color
-                    button.style.backgroundColor = color.color.toLowerCase(); // Asignar el color al fondo
-                    button.style.color = color.color.toLowerCase() === 'white' ? 'black' : 'white'; // Ajustar el color del texto si es blanco
-                    button.addEventListener('click', () => {
+                // Referencia al contenedor del precio
+                const priceDisplay = document.getElementById('selected-price');
+                priceDisplay.innerText = ''; // Inicializar sin precio seleccionado
+
+                // Verificar si `carDetails` contiene `$values`
+                const carDetails = car.carDetails?.$values ?? [];
+
+                // Extraer opciones únicas de colores y transmisiones
+                const uniqueColors = [...new Set(carDetails.map(detail => detail.color))];
+                const uniqueTransmissions = [...new Set(carDetails.map(detail => detail.transmissionType))];
+
+                let selectedColor = null;
+                let selectedTransmission = null;
+
+                // Función para actualizar el precio basado en la selección
+                function updatePrice() {
+                    const selectedDetail = carDetails.find(
+                        detail =>
+                            detail.color === selectedColor &&
+                            detail.transmissionType === selectedTransmission
+                    );
+                    if (selectedDetail) {
+                        priceDisplay.innerText = `Price: $${selectedDetail.price.toFixed(2)}`;
+                    } else {
+                        priceDisplay.innerText = 'No disponble'; // Limpia el precio si no hay selección válida
+                    }
+                }
+
+                // Renderizar colores únicos
+                uniqueColors.forEach(color => {
+                    const colorButton = document.createElement('button');
+                    colorButton.classList.add('color-option');
+                    colorButton.innerText = color;
+                    colorButton.style.backgroundColor = color.toLowerCase();
+                    colorButton.style.color = color.toLowerCase() === 'white' ? 'black' : 'white';
+                    colorButton.addEventListener('click', () => {
                         document.querySelector('.color-option.selected')?.classList.remove('selected');
-                        button.classList.add('selected');
+                        colorButton.classList.add('selected');
+                        selectedColor = color; // Actualizar color seleccionado
+                        updatePrice(); // Actualizar precio
                     });
-                    colorsContainer.appendChild(button);
+                    colorsContainer.appendChild(colorButton);
                 });
 
-                // Renderizar transmisiones
-                car.carTransmissions.$values.forEach(transmission => {
-                    const button = document.createElement('button');
-                    button.classList.add('transmission-option');
-                    button.innerText = transmission.transmission; // Usar el tipo de transmisión
-                    button.addEventListener('click', () => {
+                // Renderizar transmisiones únicas
+                uniqueTransmissions.forEach(transmission => {
+                    const transmissionButton = document.createElement('button');
+                    transmissionButton.classList.add('transmission-option');
+                    transmissionButton.innerText = transmission;
+                    transmissionButton.addEventListener('click', () => {
                         document.querySelector('.transmission-option.selected')?.classList.remove('selected');
-                        button.classList.add('selected');
+                        transmissionButton.classList.add('selected');
+                        selectedTransmission = transmission; // Actualizar transmisión seleccionada
+                        updatePrice(); // Actualizar precio
                     });
-                    transmissionsContainer.appendChild(button);
+                    transmissionsContainer.appendChild(transmissionButton);
                 });
-                //imagenes
-                // Obtener el modelo del coche de los datos de la API
-                const modelName = car.model.toLowerCase().replace(/\s+/g, '-'); // Convierte a minúsculas y reemplaza espacios por guiones
-                const imageUrl = `/PurchaseSection/images/${modelName}.jpg`; // Construye la ruta dinámica de la imagen
-
-                // Asignar la URL generada al elemento de la imagen
-                const carImageElement = document.getElementById('car-image');
-                carImageElement.src = imageUrl;
-                carImageElement.alt = `${car.model} Image`; // Añade un texto alternativo descriptivo
-
-
-
             } catch (error) {
                 console.error('Error loading car data:', error);
                 alert('Failed to load car data. Please try again.');
             }
         }
+
         loadCarData(carId);
+
+
+
 
     </script>
 </body>

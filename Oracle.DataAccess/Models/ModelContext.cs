@@ -18,14 +18,12 @@ namespace Oracle.DataAccess.Models
 
         public virtual DbSet<Accessory> Accessories { get; set; } = null!;
         public virtual DbSet<Car> Cars { get; set; } = null!;
-        public virtual DbSet<CarColor> CarColors { get; set; } = null!;
+        public virtual DbSet<CarDetail> CarDetails { get; set; } = null!;
         public virtual DbSet<CarSale> CarSales { get; set; } = null!;
-        public virtual DbSet<CarTransmission> CarTransmissions { get; set; } = null!;
         public virtual DbSet<Cart> Carts { get; set; } = null!;
         public virtual DbSet<Cartitem> Cartitems { get; set; } = null!;
         public virtual DbSet<Customer> Customers { get; set; } = null!;
         public virtual DbSet<Employee> Employees { get; set; } = null!;
-        public virtual DbSet<Inventory> Inventories { get; set; } = null!;
         public virtual DbSet<Invoice> Invoices { get; set; } = null!;
         public virtual DbSet<Order> Orders { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
@@ -87,13 +85,13 @@ namespace Oracle.DataAccess.Models
                     .HasColumnName("MODEL");
 
                 entity.Property(e => e.Year)
-                    .HasPrecision(4)
+                    .HasColumnType("NUMBER")
                     .HasColumnName("YEAR");
             });
 
-            modelBuilder.Entity<CarColor>(entity =>
+            modelBuilder.Entity<CarDetail>(entity =>
             {
-                entity.ToTable("CAR_COLORS");
+                entity.ToTable("CAR_DETAILS");
 
                 entity.Property(e => e.Id)
                     .HasColumnType("NUMBER")
@@ -109,10 +107,23 @@ namespace Oracle.DataAccess.Models
                     .IsUnicode(false)
                     .HasColumnName("COLOR");
 
+                entity.Property(e => e.Price)
+                    .HasColumnType("NUMBER")
+                    .HasColumnName("PRICE");
+
+                entity.Property(e => e.Stock)
+                    .HasColumnType("NUMBER")
+                    .HasColumnName("STOCK");
+
+                entity.Property(e => e.TransmissionType)
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("TRANSMISSION_TYPE");
+
                 entity.HasOne(d => d.Car)
-                    .WithMany(p => p.CarColors)
+                    .WithMany(p => p.CarDetails)
                     .HasForeignKey(d => d.CarId)
-                    .HasConstraintName("FK_CAR_COLORS_CAR");
+                    .HasConstraintName("SYS_C007678");
             });
 
             modelBuilder.Entity<CarSale>(entity =>
@@ -143,30 +154,6 @@ namespace Oracle.DataAccess.Models
                     .HasColumnName("SALE_DATE");
             });
 
-            modelBuilder.Entity<CarTransmission>(entity =>
-            {
-                entity.ToTable("CAR_TRANSMISSIONS");
-
-                entity.Property(e => e.Id)
-                    .HasColumnType("NUMBER")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnName("ID");
-
-                entity.Property(e => e.CarId)
-                    .HasColumnType("NUMBER")
-                    .HasColumnName("CAR_ID");
-
-                entity.Property(e => e.Transmission)
-                    .HasMaxLength(50)
-                    .IsUnicode(false)
-                    .HasColumnName("TRANSMISSION");
-
-                entity.HasOne(d => d.Car)
-                    .WithMany(p => p.CarTransmissions)
-                    .HasForeignKey(d => d.CarId)
-                    .HasConstraintName("FK_CAR_TRANSMISSIONS_CAR");
-            });
-
             modelBuilder.Entity<Cart>(entity =>
             {
                 entity.ToTable("CARTS");
@@ -179,7 +166,7 @@ namespace Oracle.DataAccess.Models
                 entity.Property(e => e.Createddate)
                     .HasPrecision(6)
                     .HasColumnName("CREATEDDATE")
-                    .HasDefaultValueSql("CURRENT_TIMESTAMP\n");
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP\n   ");
 
                 entity.Property(e => e.Userid)
                     .HasColumnType("NUMBER")
@@ -227,7 +214,7 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("CUSTOMERS");
 
-                entity.HasIndex(e => e.Cedula, "SYS_C007473")
+                entity.HasIndex(e => e.Cedula, "SYS_C007630")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
@@ -264,10 +251,10 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("EMPLOYEES");
 
-                entity.HasIndex(e => e.Cedula, "SYS_C007457")
+                entity.HasIndex(e => e.Cedula, "SYS_C007616")
                     .IsUnique();
 
-                entity.HasIndex(e => e.Email, "SYS_C007458")
+                entity.HasIndex(e => e.Email, "SYS_C007617")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
@@ -314,25 +301,6 @@ namespace Oracle.DataAccess.Models
                     .HasColumnName("SALARY");
             });
 
-            modelBuilder.Entity<Inventory>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToTable("INVENTORY");
-
-                entity.Property(e => e.CarId)
-                    .HasPrecision(19)
-                    .HasColumnName("CAR_ID");
-
-                entity.Property(e => e.Id)
-                    .HasPrecision(19)
-                    .HasColumnName("ID");
-
-                entity.Property(e => e.Quantity)
-                    .HasPrecision(10)
-                    .HasColumnName("QUANTITY");
-            });
-
             modelBuilder.Entity<Invoice>(entity =>
             {
                 entity.ToTable("INVOICES");
@@ -362,7 +330,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.Invoices)
                     .HasForeignKey(d => d.OrderId)
-                    .HasConstraintName("SYS_C007478");
+                    .HasConstraintName("SYS_C007665");
             });
 
             modelBuilder.Entity<Order>(entity =>
@@ -403,7 +371,7 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("USERS");
 
-                entity.HasIndex(e => e.Username, "SYS_C007540")
+                entity.HasIndex(e => e.Username, "SYS_C007603")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
@@ -475,12 +443,16 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Employee)
                     .WithMany(p => p.VacationRequests)
                     .HasForeignKey(d => d.EmployeeId)
-                    .HasConstraintName("SYS_C007483");
+                    .HasConstraintName("SYS_C007667");
             });
+
+            modelBuilder.HasSequence("CAR_DETAILS_SEQ");
 
             modelBuilder.HasSequence("CAR_SALES_SEQ");
 
             modelBuilder.HasSequence("CAR_SEQ");
+
+            modelBuilder.HasSequence("CARS_SEQ");
 
             modelBuilder.HasSequence("CUSTOMERS_SEQ");
 
