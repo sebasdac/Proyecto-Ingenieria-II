@@ -16,7 +16,7 @@ body {
 .container {
     display: flex;
     width: 100%;
-    height: calc(100vh - 100px); /* Ajustable para que no interfiera con header/footer */
+    height: 100%; /* Ajustable para que no interfiera con header/footer */
     background: white;
 }
 
@@ -29,8 +29,8 @@ body {
 }
 
 .car-image {
-    max-width: 90%;
-    max-height: 90%;
+    max-width: 100%;
+    max-height: 110%;
 }
 
 .purchase-section {

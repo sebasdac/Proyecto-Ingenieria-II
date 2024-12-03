@@ -150,6 +150,37 @@ nav a {
         margin-bottom: 2rem;
     }
 
+.modelox {
+    background-image: url('../images/Homepage-Model-X-Desktop-US.avif');
+    background-size: cover;
+    background-position: center;
+    height: 100vh; /* Altura completa de la ventana */
+    display: flex;
+    flex-direction: column; /* Coloca los elementos en columna */
+    justify-content: flex-start; /* El contenido empieza desde arriba */
+    align-items: center;
+    text-align: center;
+    position: relative;
+    padding: 2rem;
+}
+
+    .modelox::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.4); /* Fondo oscuro para mejorar contraste */
+        z-index: -1;
+    }
+
+    .modelox h1 {
+        font-size: 4.5rem;
+        margin-top: 3rem; /* Empuja el título hacia abajo */
+        margin-bottom: 2rem;
+    }
+
 .cta-buttons {
     display: flex;
     justify-content: center;
