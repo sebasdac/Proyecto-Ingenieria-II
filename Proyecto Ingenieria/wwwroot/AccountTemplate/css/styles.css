@@ -152,3 +152,63 @@ form {
         transform: translate(-50%, -50%) rotate(360deg);
     }
 }
+
+/* Preloader */
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000; /* Fondo negro */
+    z-index: 9999; /* Encima de todo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.preloader-content {
+    text-align: center;
+}
+
+.preloader-logo {
+    width: 150px; /* Ajusta el tamaño del logo */
+    animation: spin 2s linear infinite; /* Efecto de giro (opcional) */
+}
+
+/* Animación de giro */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Spinner (rueda de carga) */
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3); /* Color de fondo del spinner */
+    border-top: 4px solid #fff; /* Color de la parte visible */
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    margin-left: 10px; /* Espacio al lado del texto */
+    display: inline-block;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+
+
+
