@@ -7,15 +7,13 @@ namespace Oracle.DataAccess.Models
     {
         public Car()
         {
-            CarColors = new HashSet<CarColor>();
-            CarTransmissions = new HashSet<CarTransmission>();
+            CarDetails = new HashSet<CarDetail>();
         }
 
         public decimal Id { get; set; }
-        public string Model { get; set; } = null!;
-        public int Year { get; set; }
+        public string? Model { get; set; }
+        public decimal? Year { get; set; }
 
-        public virtual ICollection<CarColor> CarColors { get; set; }
-        public virtual ICollection<CarTransmission> CarTransmissions { get; set; }
+        public virtual ICollection<CarDetail> CarDetails { get; set; }
     }
 }

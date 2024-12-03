@@ -20,8 +20,7 @@ namespace Oracle.WebApi.Controllers
         public async Task<ActionResult<IEnumerable<Car>>> GetCars()
         {
             return await _context.Cars
-                .Include(c => c.CarColors)
-                .Include(c => c.CarTransmissions)
+                
                 .ToListAsync();
         }
 
@@ -29,8 +28,7 @@ namespace Oracle.WebApi.Controllers
         public async Task<ActionResult<Car>> GetCar(int id)
         {
             var car = await _context.Cars
-                .Include(c => c.CarColors)
-                .Include(c => c.CarTransmissions)
+                .Include(c => c.CarDetails) // Incluir los detalles relacionados
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (car == null)
@@ -43,34 +41,32 @@ namespace Oracle.WebApi.Controllers
                 car.Id,
                 car.Model,
                 car.Year,
-                CarColors = car.CarColors.Select(c => new { c.Id, c.Color }),
-                CarTransmissions = car.CarTransmissions.Select(t => new { t.Id, t.Transmission })
+                carDetails = car.CarDetails.Select(detail => new
+                {
+                    detail.Id,
+                    detail.TransmissionType,
+                    detail.Color,
+                    detail.Stock,
+                    detail.Price
+                }).ToList()
             });
         }
-
 
         [HttpPost]
         public async Task<ActionResult<Car>> PostCar(Car car)
         {
-            // Validar que los colores están relacionados con el coche
-            if (car.CarColors != null)
+            // Validar que CarDetails no sea nulo
+            if (car.CarDetails != null)
             {
-                foreach (var color in car.CarColors)
+                foreach (var detail in car.CarDetails)
                 {
-                    color.CarId = car.Id; // Configura la relación
+                    // Asociar el detalle al carro
+                    detail.CarId = car.Id;
+                    _context.CarDetails.Add(detail);
                 }
             }
 
-            // Validar que las transmisiones están relacionadas con el coche
-            if (car.CarTransmissions != null)
-            {
-                foreach (var transmission in car.CarTransmissions)
-                {
-                    transmission.CarId = car.Id; // Configura la relación
-                }
-            }
-
-            // Agregar el coche con sus relaciones
+            // Agregar el carro a la base de datos
             _context.Cars.Add(car);
             await _context.SaveChangesAsync();
 
@@ -79,17 +75,60 @@ namespace Oracle.WebApi.Controllers
 
 
 
-        // PUT: api/Cars/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCar(int id, Car car)
         {
             if (id != car.Id)
             {
-                return BadRequest();
+                return BadRequest("El ID del carro no coincide.");
             }
 
-            _context.Entry(car).State = EntityState.Modified;
+            // Validar existencia del carro
+            var existingCar = await _context.Cars
+                .Include(c => c.CarDetails)
+                .FirstOrDefaultAsync(c => c.Id == id);
 
+            if (existingCar == null)
+            {
+                return NotFound("El carro no existe.");
+            }
+
+            // Actualizar datos del carro principal
+            existingCar.Model = car.Model;
+            existingCar.Year = car.Year;
+
+            // Actualizar detalles (CarDetails)
+            foreach (var detail in car.CarDetails)
+            {
+                var existingDetail = existingCar.CarDetails.FirstOrDefault(d => d.Id == detail.Id);
+
+                if (existingDetail != null)
+                {
+                    // Actualizar detalle existente
+                    existingDetail.TransmissionType = detail.TransmissionType;
+                    existingDetail.Color = detail.Color;
+                    existingDetail.Stock = detail.Stock;
+                    existingDetail.Price = detail.Price;
+                }
+                else
+                {
+                    // Agregar nuevo detalle
+                    detail.CarId = id;
+                    existingCar.CarDetails.Add(detail);
+                }
+            }
+
+            // Eliminar detalles que ya no están en la solicitud
+            var detailsToRemove = existingCar.CarDetails
+                .Where(d => !car.CarDetails.Any(cd => cd.Id == d.Id))
+                .ToList();
+
+            foreach (var detail in detailsToRemove)
+            {
+                _context.CarDetails.Remove(detail);
+            }
+
+            // Guardar cambios
             try
             {
                 await _context.SaveChangesAsync();
@@ -98,7 +137,7 @@ namespace Oracle.WebApi.Controllers
             {
                 if (!_context.Cars.Any(c => c.Id == id))
                 {
-                    return NotFound();
+                    return NotFound("El carro no existe.");
                 }
                 else
                 {
@@ -109,25 +148,27 @@ namespace Oracle.WebApi.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Cars/5
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCar(int id)
         {
+            // Buscar el carro incluyendo sus detalles
             var car = await _context.Cars
-                .Include(c => c.CarColors)
-                .Include(c => c.CarTransmissions)
+                .Include(c => c.CarDetails)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (car == null)
             {
-                return NotFound();
+                return NotFound("El carro no existe.");
             }
 
+            // Eliminar el carro y sus detalles asociados
             _context.Cars.Remove(car);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
+
 
     }
 }
