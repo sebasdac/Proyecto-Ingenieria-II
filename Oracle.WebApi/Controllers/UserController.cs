@@ -83,6 +83,7 @@ namespace Oracle.WebApi.Controllers
         new Claim(JwtRegisteredClaimNames.Sub, user.Username),
         new Claim("role", user.Role),
         new Claim("userId", user.Id.ToString()),
+        new Claim("customerId", customer.Id.ToString()),
         new Claim("name", customer.Name), // Nombre del cliente
         new Claim("cedula", customer.Cedula), // Cédula
         new Claim("phone", customer.Phone), // Teléfono
