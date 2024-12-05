@@ -77,18 +77,18 @@ namespace Oracle.WebApi.Controllers
         // Método para generar el token JWT
         private string GenerateJwtToken(User user, Customer customer)
         {
-            // Definir los claims (información adicional en el token)
-            var claims = new[]
-            {
-        new Claim(JwtRegisteredClaimNames.Sub, user.Username),
-        new Claim("role", user.Role),
-        new Claim("userId", user.Id.ToString()),
-        new Claim("name", customer.Name), // Nombre del cliente
-        new Claim("cedula", customer.Cedula), // Cédula
-        new Claim("phone", customer.Phone), // Teléfono
-        new Claim("address", customer.Address), // Dirección
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-    };
+                // Definir los claims (información adicional en el token)
+                var claims = new[]
+                {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Username),
+            new Claim("role", user.Role),
+            new Claim("userId", user.Id.ToString()),
+            new Claim("name", customer.Name), // Nombre del cliente
+            new Claim("cedula", customer.Cedula), // Cédula
+            new Claim("phone", customer.Phone), // Teléfono
+            new Claim("address", customer.Address), // Dirección
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
 
             // Obtener la llave secreta del archivo appsettings.json
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
@@ -99,7 +99,7 @@ namespace Oracle.WebApi.Controllers
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(2), // Expiración del token
+                expires: DateTime.UtcNow.AddMinutes(1), // Expiración del token
                 signingCredentials: creds
             );
 

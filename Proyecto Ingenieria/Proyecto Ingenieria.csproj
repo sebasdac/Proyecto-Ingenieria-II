@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\NewFolder\**" />
+    <Content Remove="wwwroot\NewFolder\**" />
+    <EmbeddedResource Remove="wwwroot\NewFolder\**" />
+    <None Remove="wwwroot\NewFolder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="jwt-decode" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNet.Cors" Version="5.3.0" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Cors" Version="5.3.0" />
@@ -23,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\NewFolder\" />
+    <Folder Include="wwwroot\NewFolder1\" />
   </ItemGroup>
 
 </Project>
