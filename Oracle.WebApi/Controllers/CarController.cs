@@ -17,11 +17,43 @@ namespace Oracle.WebApi.Controllers
 
         // GET: api/Cars
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Car>>> GetCars()
+        public async Task<IActionResult> GetCars()
         {
-            return await _context.Cars
-                
-                .ToListAsync();
+            try
+            {
+                var cars = await _context.Cars
+                    .Include(c => c.CarDetails)
+                    .Select(c => new
+                    {
+                        c.Id,
+                        c.Model,
+                        c.Year,
+                        CarDetails = c.CarDetails.Select(cd => new
+                        {
+                            cd.Id,
+                            cd.TransmissionType,
+                            cd.Color,
+                            cd.Stock,
+                            cd.Price
+                        }).ToList()
+                    })
+                    .ToListAsync();
+
+                return Ok(cars);
+            }
+            catch (Exception ex)
+            {
+                // Log exception
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+
+                // Return JSON error response
+                return StatusCode(500, new
+                {
+                    message = "Error interno del servidor",
+                    error = ex.Message
+                });
+            }
         }
 
         [HttpGet("{id}")]
