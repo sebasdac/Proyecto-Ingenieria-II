@@ -36,18 +36,35 @@ namespace Oracle.WebApi.Controllers
             return CreatedAtAction(nameof(CrearFactura), new { id = invoice.Id }, invoice);
         }
 
-        [HttpPut]//actualizar
-        public async Task<IActionResult> ActualizarFactura([FromBody] Invoice invoice)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> ActualizarFactura(long id, [FromBody] Invoice invoice)
         {
-            if (!_context.Invoices.Any(i => i.Id == invoice.Id))
+            try
             {
-                return BadRequest("El ID de la factura no existe.");
-            }
+          
+                var existingInvoice = await _context.Invoices.FindAsync(id);
+                if (existingInvoice == null)
+                {
+                    return NotFound(new { message = "Factura no encontrada." });
+                }
 
-            _context.Invoices.Update(invoice);
-            await _context.SaveChangesAsync();
-            return Ok();
+
+                existingInvoice.Status = invoice.Status;
+
+              
+                _context.Invoices.Update(existingInvoice);
+                await _context.SaveChangesAsync();
+
+                return Ok(existingInvoice);  
+            }
+            catch (Exception ex)
+            {
+ 
+                Console.WriteLine($"Error al actualizar la factura: {ex.Message}");
+                return StatusCode(500, new { message = "Ocurrió un error al actualizar la factura." });
+            }
         }
+
         //buscar por id de factura
 
         [HttpGet("{id}")]
