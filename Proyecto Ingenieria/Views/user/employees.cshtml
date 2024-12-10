@@ -1,0 +1,424 @@
+﻿@{
+    ViewData["Title"] = "employees";
+    Layout = "~/Views/Shared/_head_foot.cshtml";
+}
+<div class="container mt-4">
+    <h1>Gestión de Empleados</h1>
+
+    <!-- Campo de búsqueda -->
+    <div class="mb-3">
+        <label for="search" class="form-label">Buscar Empleado:</label>
+        <input type="text" id="search" class="form-control" placeholder="Ingrese ID, nombre o cédula">
+    </div>
+
+    <!-- Botones CRUD -->
+    <div class="mb-3">
+        <button type="button" id="AddButton" class="btn btn-primary">Agregar</button>
+        <button type="button" id="updateButton" class="btn btn-primary">Actualizar</button>
+        <button type="button" id="deleteButton" class="btn btn-primary">Eliminar</button>
+        <button type="button" id="SearchButton" class="btn btn-primary">Buscar</button>
+    </div>
+
+    <!-- Formulario para agregar empleado -->
+    <div class="mb-4">
+        <h2>Agregar Empleado</h2>
+        <form id="addEmployeeForm">
+            <div class="mb-3">
+                <label for="addEmployeeId" class="form-label">ID</label>
+                <input type="text" id="addEmployeeId" class="form-control" placeholder="Ingrese el ID del empleado">
+            </div>
+            <div class="mb-3">
+                <label for="addEmployeeName" class="form-label">Nombre</label>
+                <input type="text" id="addEmployeeName" class="form-control" placeholder="Ingrese el nombre del empleado">
+            </div>
+            <div class="mb-3">
+                <label for="addEmployeeLastName" class="form-label">Apellido</label>
+                <input type="text" id="addEmployeeLastName" class="form-control" placeholder="Ingrese el apellido">
+            </div>
+            <div class="mb-3">
+                <label for="addEmployeeCedula" class="form-label">Cédula</label>
+                <input type="text" id="addEmployeeCedula" class="form-control" placeholder="Ingrese la cédula">
+            </div>
+            <div class="mb-3">
+                <label for="addEmployeePosition" class="form-label">Posición</label>
+                <input type="text" id="addEmployeePosition" class="form-control" placeholder="Ingrese la posición">
+            </div>
+            <div class="mb-3">
+                <label for="addEmployeeSalary" class="form-label">Salario</label>
+                <input type="number" id="addEmployeeSalary" class="form-control" placeholder="Ingrese el salario">
+            </div>
+            <div class="mb-3">
+                <label for="addEmployeeHireDate" class="form-label">Fecha de Contratación</label>
+                <input type="date" id="addEmployeeHireDate" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label for="addEmployeePhone" class="form-label">Teléfono</label>
+                <input type="text" id="addEmployeePhone" class="form-control" placeholder="Ingrese el teléfono">
+            </div>
+            <div class="mb-3">
+                <label for="addEmployeeEmail" class="form-label">Email</label>
+                <input type="email" id="addEmployeeEmail" class="form-control" placeholder="Ingrese el email">
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla de empleados -->
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Posición</th>
+                <th>Salario</th>
+                <th>Fecha de Contratación</th>
+                <th>Cédula</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody id="employeesTable">
+            <!-- Aquí se llenarán los datos dinámicamente -->
+        </tbody>
+    </table>
+</div>
+
+
+<script>
+    document.getElementById("SearchButton").addEventListener("click", function () {
+        const id = document.getElementById("search").value; // Obtiene el ID del campo de texto
+        if (!id) {
+            alert("Por favor, ingrese un ID en el campo de búsqueda.");
+            return;
+        }
+        buscarEmpleadoPorId(id);
+    });
+
+    function buscarEmpleadoPorId(id) {
+        fetch(`https://localhost:7277/api/Employee/${id}`, {
+            method: "GET",
+            headers: {
+                "Accept": "text/plain"
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Error al obtener el empleado.");
+                }
+                return response.json();
+            })
+            .then(employee => {
+                agregarEmpleadoATabla(employee);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("No se pudo obtener el empleado.");
+            });
+    }
+
+    function agregarEmpleadoATabla(employee) {
+        const {
+            id,
+            employeeName,
+            lastName,
+            position,
+            salary,
+            hireDate,
+            cedula,
+            phone,
+            email
+        } = employee;
+
+        // Verifica si el empleado ya está en la tabla
+        const tabla = document.getElementById("employeesTable");
+        const filas = tabla.getElementsByTagName("tr");
+        for (let i = 0; i < filas.length; i++) {
+            if (filas[i].dataset.id === String(id)) {
+                alert("El empleado ya está en la tabla.");
+                return;
+            }
+        }
+
+        // Crea una nueva fila
+        const nuevaFila = document.createElement("tr");
+        nuevaFila.dataset.id = id;
+
+        nuevaFila.innerHTML = `
+            <td>${id}</td>
+            <td>${employeeName}</td>
+            <td>${lastName}</td>
+            <td>${position}</td>
+            <td>${salary}</td>
+            <td>${hireDate}</td>
+            <td>${cedula}</td>
+            <td>${phone}</td>
+            <td>${email}</td>
+        `;
+
+        // Agrega la nueva fila a la tabla
+        tabla.appendChild(nuevaFila);
+    }
+
+        document.getElementById("updateButton").addEventListener("click", function () {
+            const id = document.getElementById("addEmployeeId").value;
+        const employeeName = document.getElementById("addEmployeeName").value;
+        const lastName = document.getElementById("addEmployeeLastName").value;
+        const cedula = document.getElementById("addEmployeeCedula").value;
+        const position = document.getElementById("addEmployeePosition").value;
+        const salary = document.getElementById("addEmployeeSalary").value;
+        const hireDate = document.getElementById("addEmployeeHireDate").value;
+        const phone = document.getElementById("addEmployeePhone").value;
+        const email = document.getElementById("addEmployeeEmail").value;
+
+        if (!id || !employeeName || !lastName || !cedula || !position || !salary || !hireDate || !phone || !email) {
+            alert("Por favor, complete todos los campos antes de actualizar.");
+        return;
+            }
+
+        const employee = {
+            id: parseInt(id),
+        employeeName,
+        position,
+        salary: parseFloat(salary),
+        hireDate: new Date(hireDate).toISOString(),
+        lastName,
+        cedula,
+        phone,
+        email,
+        vacationRequests: [] // Vacío por ahora, se puede expandir si es necesario
+            };
+
+        actualizarEmpleado(employee);
+        });
+
+        function actualizarEmpleado(employee) {
+            fetch("https://localhost:7277/api/Employee", {
+                method: "PUT",
+                headers: {
+                    "Accept": "text/plain",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(employee)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Error al actualizar el empleado.");
+                    }
+                    return response.json();
+                })
+                .then(updatedEmployee => {
+                    alert("Empleado actualizado correctamente.");
+                    actualizarEmpleadoEnTabla(updatedEmployee);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("No se pudo actualizar el empleado.");
+                });
+        }
+
+        function actualizarEmpleadoEnTabla(employee) {
+            const {
+            id,
+            employeeName,
+            lastName,
+            position,
+            salary,
+            hireDate,
+            cedula,
+            phone,
+            email
+        } = employee;
+
+        const tabla = document.getElementById("employeesTable");
+        const filas = tabla.getElementsByTagName("tr");
+        let encontrado = false;
+
+        for (let i = 0; i < filas.length; i++) {
+                if (filas[i].dataset.id === String(id)) {
+            filas[i].innerHTML = `
+                        <td>${id}</td>
+                        <td>${employeeName}</td>
+                        <td>${lastName}</td>
+                        <td>${position}</td>
+                        <td>${salary}</td>
+                        <td>${hireDate}</td>
+                        <td>${cedula}</td>
+                        <td>${phone}</td>
+                        <td>${email}</td>
+                    `;
+        encontrado = true;
+        break;
+                }
+            }
+
+        if (!encontrado) {
+                // Si no se encuentra el empleado, se agrega como una nueva fila
+                const nuevaFila = document.createElement("tr");
+        nuevaFila.dataset.id = id;
+
+        nuevaFila.innerHTML = `
+        <td>${id}</td>
+        <td>${employeeName}</td>
+        <td>${lastName}</td>
+        <td>${position}</td>
+        <td>${salary}</td>
+        <td>${hireDate}</td>
+        <td>${cedula}</td>
+        <td>${phone}</td>
+        <td>${email}</td>
+        `;
+
+        tabla.appendChild(nuevaFila);
+            }
+        }
+
+
+
+    document.getElementById("AddButton").addEventListener("click", function () {
+        const id = document.getElementById("addEmployeeId").value;
+        const employeeName = document.getElementById("addEmployeeName").value;
+        const lastName = document.getElementById("addEmployeeLastName").value;
+        const cedula = document.getElementById("addEmployeeCedula").value;
+        const position = document.getElementById("addEmployeePosition").value;
+        const salary = document.getElementById("addEmployeeSalary").value;
+        const hireDate = document.getElementById("addEmployeeHireDate").value;
+        const phone = document.getElementById("addEmployeePhone").value;
+        const email = document.getElementById("addEmployeeEmail").value;
+
+        if (!employeeName || !lastName || !cedula || !position || !salary || !hireDate || !phone || !email) {
+            alert("Por favor, complete todos los campos del formulario.");
+            return;
+        }
+
+        const employee = {
+            id: parseInt(id),
+            employeeName: employeeName,
+            position: position,
+            salary: parseFloat(salary),
+            hireDate: new Date(hireDate).toISOString(),
+            lastName: lastName,
+            cedula: cedula,
+            phone: phone,
+            email: email,
+            vacationRequests: [
+                {
+                    id: 0, // ID asignado por el servidor
+                    employeeId: 0, // Relacionado con el empleado
+                    startDate: new Date().toISOString(),
+                    endDate: new Date().toISOString(),
+                    status: "Pending", // Estado predeterminado
+                    comments: "Initial request",
+                    employee: employeeName
+                }
+            ]
+        };
+
+        agregarEmpleado(employee);
+    });
+
+    function agregarEmpleado(employee) {
+        fetch("https://localhost:7277/api/Employee", {
+            method: "POST",
+            headers: {
+                "Accept": "text/plain",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(employee)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Error al agregar el empleado.");
+                }
+                return response.json();
+            })
+            .then(newEmployee => {
+                alert("Empleado agregado correctamente.");
+                agregarEmpleadoATabla(newEmployee);
+                limpiarFormularioAgregarEmpleado();
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("No se pudo agregar el empleado.");
+            });
+    }
+
+    function agregarEmpleadoATabla(employee) {
+        const {
+            id,
+            employeeName,
+            lastName,
+            position,
+            salary,
+            hireDate,
+            cedula,
+            phone,
+            email
+        } = employee;
+
+        const tabla = document.getElementById("employeesTable");
+        const nuevaFila = document.createElement("tr");
+        nuevaFila.dataset.id = id;
+
+        nuevaFila.innerHTML = `
+                <td>${id}</td>
+                <td>${employeeName}</td>
+                <td>${lastName}</td>
+                <td>${position}</td>
+                <td>${salary}</td>
+                <td>${hireDate}</td>
+                <td>${cedula}</td>
+                <td>${phone}</td>
+                <td>${email}</td>
+            `;
+
+        tabla.appendChild(nuevaFila);
+    }
+
+    function limpiarFormularioAgregarEmpleado() {
+        document.getElementById("addEmployeeForm").reset();
+    }
+
+    document.getElementById("deleteButton").addEventListener("click", function () {
+        const id = document.getElementById("search").value; // Obtiene el ID del campo de texto
+        if (!id) {
+            alert("Por favor, ingrese un ID en el campo de búsqueda.");
+            return;
+        }
+        eliminarEmpleado(id);
+    });
+
+    function eliminarEmpleado(id) {
+        fetch(`https://localhost:7277/api/Employee/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Accept": "text/plain"
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error al eliminar el empleado con ID ${id}.`);
+                }
+                alert(`Empleado con ID ${id} eliminado correctamente.`);
+                eliminarEmpleadoDeTabla(id);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("No se pudo eliminar el empleado.");
+            });
+    }
+
+    function eliminarEmpleadoDeTabla(id) {
+        const tabla = document.getElementById("employeesTable");
+        const filas = tabla.getElementsByTagName("tr");
+        for (let i = 0; i < filas.length; i++) {
+            if (filas[i].dataset.id === String(id)) {
+                tabla.removeChild(filas[i]);
+                return;
+            }
+        }
+        alert("El empleado no se encontró en la tabla.");
+    }
+</script>
+
+
+
