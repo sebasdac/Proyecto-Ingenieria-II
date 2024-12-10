@@ -58,8 +58,7 @@
             <li class="nav-item nav-category">
                 <span class="nav-link">Navigation</span>
             </li>
-            <!-- Inicio -->
-            <li class="nav-item menu-items">
+            <li class="nav-item menu-items admin-only">
                 <a class="nav-link" asp-controller="user" asp-action="DashBoard">
                     <span class="menu-icon">
                         <i class="mdi mdi-speedometer"></i>
@@ -87,10 +86,13 @@
             </li>
             <!-- Inventario -->
             <li class="nav-item menu-items">
+                <a class="nav-link" asp-controller="user" asp-action="Carros">
+                </a>
                 <a class="nav-link" asp-controller="inventory" asp-action="Index">
                     <span class="menu-icon">
                         <i class="mdi mdi-database"></i>
                     </span>
+                    <span class="menu-title">Carros</span>
                     <span class="menu-title">Inventario</span>
                 </a>
             </li>
@@ -132,25 +134,57 @@
             </li>
             <!-- Configuración -->
             <li class="nav-item menu-items">
+                <a class="nav-link" asp-controller="user" asp-action="Facturas">
+                    </a>
                 <a class="nav-link" asp-controller="settings" asp-action="Index">
                     <span class="menu-icon">
                         <i class="mdi mdi-settings"></i>
                     </span>
+                    <span class="menu-title">Facturas</span>
                     <span class="menu-title">Configuración</span>
                 </a>
             </li>
         </ul>
     </nav>
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+    
+    <script>
+        // Obtener el token del localStorage
     <script>
         const token = localStorage.getItem('token');
         if (token) {
-            const decodedToken = jwt_decode(token);
-            const name = decodedToken.name || "Usuario";
-            document.getElementById('usernameDisplay').innerText = `Hola, ${name}`;
+            try {
+                // Decodificar el token usando jwt-decode
+                const decodedToken = jwt_decode(token);
+                console.log("datos token: ", decodedToken)
+
+                // Extraer datos relevantes del token
+                const role = decodedToken.role; // Asegúrate de que el campo "role" está en el token
+                const name = decodedToken.name; // Si necesitas el nombre del usuario
+
+                // Mostrar el nombre del usuario en la página
+                document.getElementById('usernameDisplay').innerText = `Hola, ${name}`;
+
+                // Lógica para mostrar/ocultar opciones del menú según el rol
+                if (role === 'Cliente') {
+                    // Ocultar opciones exclusivas de Administradores
+                    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+                } else if (role === 'Administrador') {
+                    // Mostrar opciones exclusivas de Administradores (opcional si están ocultas por defecto)
+                    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+                } else {
+                    // Si el rol no es reconocido, puedes redirigir o manejarlo
+                    alert('No tienes acceso a esta página.');
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Error al decodificar el token:', error);
+                alert('Token inválido. Por favor, inicia sesión nuevamente.');
+                window.location.href = '/login.html';
+            }
         } else {
+            // Manejar el caso donde no hay token
             alert('No estás autenticado. Por favor, inicia sesión.');
             window.location.href = '/login.html';
         }
     </script>
-</div>
