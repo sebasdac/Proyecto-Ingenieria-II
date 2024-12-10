@@ -20,6 +20,7 @@ namespace Proyecto.Controllers
         {
             return View();
         }
+        //
         public IActionResult Forms()
         {
             return View();
