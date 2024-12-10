@@ -123,7 +123,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Car)
                     .WithMany(p => p.CarDetails)
                     .HasForeignKey(d => d.CarId)
-                    .HasConstraintName("SYS_C007690");
+                    .HasConstraintName("SYS_C007678");
             });
 
             modelBuilder.Entity<CarSale>(entity =>
@@ -214,7 +214,7 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("CUSTOMERS");
 
-                entity.HasIndex(e => e.Cedula, "SYS_C007662")
+                entity.HasIndex(e => e.Cedula, "SYS_C007630")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
@@ -251,10 +251,10 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("EMPLOYEES");
 
-                entity.HasIndex(e => e.Cedula, "SYS_C007648")
+                entity.HasIndex(e => e.Cedula, "SYS_C007616")
                     .IsUnique();
 
-                entity.HasIndex(e => e.Email, "SYS_C007649")
+                entity.HasIndex(e => e.Email, "SYS_C007617")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
@@ -330,7 +330,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.Invoices)
                     .HasForeignKey(d => d.OrderId)
-                    .HasConstraintName("SYS_C007691");
+                    .HasConstraintName("SYS_C007665");
             });
 
             modelBuilder.Entity<Order>(entity =>
@@ -371,7 +371,7 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("USERS");
 
-                entity.HasIndex(e => e.Username, "SYS_C007637")
+                entity.HasIndex(e => e.Username, "SYS_C007603")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
@@ -402,6 +402,11 @@ namespace Oracle.DataAccess.Models
                     .HasMaxLength(255)
                     .IsUnicode(false)
                     .HasColumnName("USERNAME");
+
+                entity.HasOne(d => d.Customer)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.CustomerId)
+                    .HasConstraintName("FK_CUSTOMER");
             });
 
             modelBuilder.Entity<VacationRequest>(entity =>
@@ -438,7 +443,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Employee)
                     .WithMany(p => p.VacationRequests)
                     .HasForeignKey(d => d.EmployeeId)
-                    .HasConstraintName("SYS_C007692");
+                    .HasConstraintName("SYS_C007667");
             });
 
             modelBuilder.HasSequence("CAR_DETAILS_SEQ");
@@ -458,8 +463,6 @@ namespace Oracle.DataAccess.Models
             modelBuilder.HasSequence("INVOICES_SEQ");
 
             modelBuilder.HasSequence("ORDERS_SEQ");
-
-            modelBuilder.HasSequence("SUPPLIERS_SEQ");
 
             modelBuilder.HasSequence("USERS_SEQ");
 
