@@ -170,7 +170,7 @@
           ctx.font = fontSize + "rem sans-serif";
           ctx.textAlign = 'left';
           ctx.textBaseline = "middle";
-          ctx.fillStyle = "#ffffff";
+              ctx.fillStyle = "#ffffff";
       
           var text = "$1200", 
               textX = Math.round((width - ctx.measureText(text).width) / 2),

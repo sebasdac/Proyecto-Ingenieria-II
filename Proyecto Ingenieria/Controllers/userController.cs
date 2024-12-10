@@ -29,6 +29,14 @@ namespace Proyecto.Controllers
         {
             return View();
         }
+        public IActionResult customers()
+        {
+            return View();
+        }
+        public IActionResult employees()
+        {
+            return View();
+        }
         public IActionResult Carros()
         {
             return View();
@@ -50,6 +58,10 @@ namespace Proyecto.Controllers
             return View();
         }
 
+        public IActionResult Orders()
+        {
+            return View();
+        }
 
 
     }
