@@ -73,10 +73,7 @@ namespace Oracle.WebApi.Controllers
                                PdfSharp.Drawing.XStringFormats.TopLeft);
                 startY += lineHeight;
 
-                gfx.DrawString($"Estado: {order.OrderStatus}", font, PdfSharp.Drawing.XBrushes.Black,
-                               new PdfSharp.Drawing.XRect(20, startY, page.Width - 40, page.Height - 40),
-                               PdfSharp.Drawing.XStringFormats.TopLeft);
-                startY += lineHeight;
+                
 
                 gfx.DrawString($"Fecha: {order.OrderDate:dd/MM/yyyy}", font, PdfSharp.Drawing.XBrushes.Black,
                                new PdfSharp.Drawing.XRect(20, startY, page.Width - 40, page.Height - 40),
@@ -219,5 +216,7 @@ namespace Oracle.WebApi.Controllers
                 return StatusCode(500, "Se encontró un error");
             }
         }
+
+        
     }
 }

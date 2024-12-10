@@ -14,15 +14,33 @@
     <link rel="stylesheet" href="~/template/assets/vendors/flag-icon-css/css/flag-icon.min.css">
     <link rel="stylesheet" href="~/template/assets/vendors/owl-carousel-2/owl.carousel.min.css">
     <link rel="stylesheet" href="~/template/assets/vendors/owl-carousel-2/owl.theme.default.min.css">
+
+
+    
     <!-- End plugin css for this page -->
     <!-- inject:css -->
     <!-- endinject -->
     <!-- Layout styles -->
     <link rel="stylesheet" href="~/template/assets/css/style.css">
+    <link rel="stylesheet" href="~/preloaderStyle/stylePreloader.css">
     <!-- End layout styles -->
     <link rel="shortcut icon" href="~/template/assets/images/favicon.png" />
 </head>
 <body>
+    <style>
+    #preloader {
+        display: none; /* Ocultar por defecto */
+    }
+   </style>
+
+    <!-- Preloader -->
+    <div id="preloader" style="display:none">
+        <div class="preloader-content">
+            <img src="~/StoreTemplate/images/logo-default.png" alt="Tesla Logo" class="preloader-logo">
+        </div>
+    </div>
+    <!-- Fin Preloader -->
+
     <partial name="_Menu_DashBoard"></partial>
     
     <!-- partial -->
@@ -208,9 +226,13 @@
                                             <i class="mdi mdi-logout text-danger"></i>
                                         </div>
                                     </div>
-                                    <div class="preview-item-content">
-                                        <p class="preview-subject mb-1">Log out</p>
-                                    </div>
+                                <div class="preview-item-content">
+                                    <a asp-controller="Account" asp-action="Index" class="preview-subject mb-1 logout-link">
+                                        
+                                        <span>Log out</span>
+                                    </a>
+                                </div>
+
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <p class="p-3 mb-0 text-center">Advanced settings</p>

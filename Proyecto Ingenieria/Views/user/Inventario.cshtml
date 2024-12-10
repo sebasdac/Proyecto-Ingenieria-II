@@ -1,0 +1,164 @@
+﻿
+@{
+    ViewData["Title"] = "Inventario";
+    Layout = "~/Views/Shared/_head_foot.cshtml";
+}
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Inventarios</h1>
+       
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table me-1"></i>
+                Stock de vehiculos
+            </div>
+            <div class="card-body" class="table-responsive">
+                <input id="searchInput" class="datatable-input" placeholder="Search..." type="search" title="Search within table" aria-controls="datatablesSimple">
+                <table id="datatablesSimple" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ID CARRO</th>
+                            <th>TIPO DE TRANSMISION</th>
+                            <th>COLOR</th>
+                            <th>STOCK</th>
+                            <th>PRECIO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>ID</th>
+                            <th>ID CARRO</th>
+                            <th>TIPO DE TRANSMISION</th>
+                            <th>COLOR</th>
+                            <th>STOCK</th>
+                            <th>PRECIO</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+<script>
+    //preloaders
+    function showPreloader() {
+        document.getElementById('preloader').style.display = 'flex';
+    }
+
+    function hidePreloader() {
+        const preloader = document.getElementById('preloader');
+        preloader.style.opacity = "0"; // Suaviza la desaparición
+        preloader.style.transition = "opacity 0.5s ease"; // Efecto de desvanecimiento
+
+        setTimeout(() => {
+            preloader.style.display = "none";
+        }, 500);
+    }
+    //fin preloaders
+    //mostrar preloader
+    showPreloader();
+    document.addEventListener("DOMContentLoaded", function () {
+        const table = document.getElementById("datatablesSimple");
+        const searchInput = document.getElementById("searchInput");
+
+        if (!table) {
+            console.error("Table not found!");
+            return;
+        }
+
+
+        function fillTable(data) {
+            const tbody = table.querySelector('tbody');
+            tbody.innerHTML = '';
+
+            data.forEach(car => {
+                const details = car.carDetails?.$values || [];
+                details.forEach(detail => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                                <td>${detail.id}</td>
+                                <td>${car.id}</td>
+                                <td>${detail.transmissionType || 'N/A'}</td>
+                                <td>${detail.color || 'N/A'}</td>
+                                <td>${detail.stock || '0'}</td>
+                                <td>${detail.price || '0.00'}</td>
+                            `;
+                });
+            });
+            //ocultar preloader
+            hidePreloader();
+        }
+
+        // Cargar todos los datos al inicio
+        fetch('https://localhost:7277/api/Car')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Datos iniciales recibidos:", data);
+                fillTable(data.$values || []);
+            })
+            .catch(error => {
+                console.error("Error al cargar los datos iniciales:", error);
+                alert("No se pudieron cargar los datos iniciales: " + error.message);
+            });
+           
+
+
+        searchInput.addEventListener("input", function () {
+            const filterValue = searchInput.value.trim();
+
+            if (filterValue === "") {
+
+                fetch('/api/Car')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        fillTable(data.$values || []);
+                    })
+                    .catch(error => {
+                        console.error("Error al cargar todos los datos:", error);
+                        alert("No se pudieron cargar todos los datos: " + error.message);
+                    });
+            } else {
+                // Si hay un valor, buscar por ID
+
+                fetch(`https://localhost:7277/api/Car/${filterValue}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            if (response.status === 404) {
+                                // Si no se encuentra el ID, vaciar la tabla
+                                fillTable([]);
+                                return;
+                            }
+                            throw new Error(`HTTP error ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("Datos filtrados por ID:", data);
+                        fillTable([data]);
+                    })
+                    .catch(error => {
+                        console.error("Error al filtrar por ID:", error);
+                        alert("No se pudo filtrar por ID: " + error.message);
+                    });
+            }
+        });
+    });
+
+
+</script>

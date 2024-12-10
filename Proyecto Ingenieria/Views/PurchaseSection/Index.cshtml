@@ -143,7 +143,8 @@
             <!-- Payment Section -->
             <div id="payment-section" class="details-column">
                 <h2>Payment</h2>
-                <button onclick="processPayment()">Proceed to Payment</button>
+                <button onclick="submitOrder()">Confirmar orden</button>
+
             </div>
         </div>
     </div>
@@ -253,6 +254,75 @@
             alert('Redirecting to payment gateway...');
             // Add actual payment gateway redirection here
         }
+
+
+        //parte de pagos
+ 
+            // Función para obtener datos del cliente a partir del JWT
+            function getCustomerDataFromToken() {
+                const jwt = localStorage.getItem('token');
+                if (!jwt) return null;
+
+                const payload = parseJwt(jwt);
+                return payload ? {
+                    name: payload.name,
+                    cedula: payload.cedula,
+                    phone: payload.phone,
+                    address: payload.address
+                } : null;
+            }
+
+        async function submitOrder() {
+            const orderData = JSON.parse(localStorage.getItem('orderData'));
+            const customerData = getCustomerDataFromToken();
+
+            if (!orderData || !customerData) {
+                alert('Faltan datos para crear la orden. Por favor revisa tu sesión y la información del auto.');
+                return;
+            }
+
+            // Construir el objeto order que la API espera
+            const order = {
+                // Puedes generar un número de orden o usar uno fijo; aquí usamos una marca de tiempo
+                orderNumber: "ORD-" + Date.now(),
+                customerName: customerData.name,
+                carModel: orderData.model,
+                orderStatus: "Pendiente",    // Por ejemplo, un estado inicial
+                orderDate: new Date().toISOString(),
+                // Puedes crear una factura inicial si lo deseas
+                invoices: [
+                    {
+                        invoiceDate: new Date().toISOString(),
+                        totalAmount: parseFloat(orderData.price),
+                        status: "Pendiente"
+                    }
+                ]
+            };
+
+            try {
+                const response = await fetch('https://localhost:7277/api/Order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(order)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText);
+                }
+
+                const createdOrder = await response.json();
+                console.log('Orden creada exitosamente:', createdOrder);
+                alert('¡Orden creada con éxito!');
+                // Aquí puedes redirigir a otra página o limpiar el localStorage
+            } catch (error) {
+                console.error('Error al crear la orden:', error);
+                alert('Ocurrió un error al crear la orden. Revisa la consola para más detalles.');
+            }
+        }
+
     </script>
 
 

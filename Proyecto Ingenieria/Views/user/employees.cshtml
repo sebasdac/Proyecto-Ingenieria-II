@@ -299,18 +299,8 @@
             lastName: lastName,
             cedula: cedula,
             phone: phone,
-            email: email,
-            vacationRequests: [
-                {
-                    id: 0, // ID asignado por el servidor
-                    employeeId: 0, // Relacionado con el empleado
-                    startDate: new Date().toISOString(),
-                    endDate: new Date().toISOString(),
-                    status: "Pending", // Estado predeterminado
-                    comments: "Initial request",
-                    employee: employeeName
-                }
-            ]
+            email: email
+            
         };
 
         agregarEmpleado(employee);

@@ -20,6 +20,10 @@ namespace Proyecto.Controllers
         {
             return View();
         }
+        public IActionResult Inventario()
+        {
+            return View();
+        }
         //
         public IActionResult Forms()
         {
@@ -59,6 +63,14 @@ namespace Proyecto.Controllers
         }
 
         public IActionResult Orders()
+        {
+            return View();
+        }
+        public IActionResult Pedidos()
+        {
+            return View();
+        }
+        public IActionResult Reportes()
         {
             return View();
         }

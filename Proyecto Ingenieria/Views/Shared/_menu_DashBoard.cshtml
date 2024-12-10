@@ -86,7 +86,7 @@
             </li>
             <!-- Inventario -->
             <li class="nav-item menu-items admin-only">
-                <a class="nav-link" asp-controller="inventory" asp-action="Index">
+                <a class="nav-link" asp-controller="user" asp-action="Inventario">
                     <span class="menu-icon">
                         <i class="mdi mdi-database"></i>
                     </span>
@@ -95,7 +95,7 @@
             </li>
             <!-- Pedidos -->
             <li class="nav-item menu-items admin-only">
-                <a class="nav-link" asp-controller="orders" asp-action="Index">
+                <a class="nav-link" asp-controller="user" asp-action="Pedidos">
                     <span class="menu-icon">
                         <i class="mdi mdi-cart"></i>
                     </span>
@@ -104,7 +104,7 @@
             </li>
             <!-- Facturación -->
             <li class="nav-item menu-items">
-                <a class="nav-link" asp-controller="invoices" asp-action="Index">
+                <a class="nav-link" asp-controller="user" asp-action="Facturas">
                     <span class="menu-icon">
                         <i class="mdi mdi-file-document"></i>
                     </span>
@@ -121,23 +121,16 @@
                 </a>
             </li>
             <!-- Reportes -->
-            <li class="nav-item menu-items">
-                <a class="nav-link" asp-controller="reports" asp-action="Index">
+            <li class="nav-item menu-itemsa admin-only">
+                <a class="nav-link" asp-controller="user" asp-action="Reportes">
                     <span class="menu-icon">
                         <i class="mdi mdi-chart-bar"></i>
                     </span>
                     <span class="menu-title">Reportes</span>
                 </a>
             </li>
-            <!-- Configuración -->
-            <li class="nav-item menu-items">
-                <a class="nav-link" asp-controller="user" asp-action="Facturas">
-                    <span class="menu-icon">
-                        <i class="mdi mdi-settings"></i>
-                    </span>
-                    <span class="menu-title">Facturas</span>
-                </a>
-            </li>
+            
+            
         </ul>
     </nav>
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>

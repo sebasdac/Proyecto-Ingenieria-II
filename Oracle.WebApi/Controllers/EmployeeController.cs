@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Oracle.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
+using PdfSharp.Drawing;
+using PdfSharp.Pdf;
+
 
 
 namespace Oracle.WebApi.Controllers
@@ -164,6 +167,71 @@ namespace Oracle.WebApi.Controllers
             catch (DbUpdateException)
             {
                 return StatusCode(500, "Se encontro un error");
+            }
+        }
+
+        //exporat empleados a pdf
+        [HttpGet("ExportarEmpleadosPDF")]
+        public async Task<IActionResult> ExportarEmpleadosPDF()
+        {
+            // Obtener datos de la base de datos
+            var empleados = await _context.Employees.ToListAsync();
+
+            // Crear un documento PDF
+            PdfDocument document = new PdfDocument();
+            document.Info.Title = "Lista de Empleados";
+
+            // Crear una página en el PDF
+            PdfPage page = document.AddPage();
+            XGraphics gfx = XGraphics.FromPdfPage(page);
+            XFont titleFont = new XFont("Arial", 14);
+            XFont tableFont = new XFont("Arial", 10);
+
+            // Título
+            gfx.DrawString("Lista de Empleados", titleFont, XBrushes.Black, new XPoint(40, 40));
+
+            // Coordenadas iniciales para la tabla
+            double yPoint = 70;
+
+            // Dibujar encabezados de la tabla
+            gfx.DrawString("ID", tableFont, XBrushes.Black, new XPoint(40, yPoint));
+            gfx.DrawString("Nombre", tableFont, XBrushes.Black, new XPoint(80, yPoint));
+            gfx.DrawString("Puesto", tableFont, XBrushes.Black, new XPoint(200, yPoint));
+            gfx.DrawString("Salario", tableFont, XBrushes.Black, new XPoint(300, yPoint));
+            gfx.DrawString("Teléfono", tableFont, XBrushes.Black, new XPoint(400, yPoint));
+            gfx.DrawString("Correo", tableFont, XBrushes.Black, new XPoint(500, yPoint));
+
+            yPoint += 20; // Espaciado
+
+            // Agregar filas de datos
+            foreach (var empleado in empleados)
+            {
+                gfx.DrawString(empleado.Id.ToString(), tableFont, XBrushes.Black, new XPoint(40, yPoint));
+                gfx.DrawString(empleado.EmployeeName, tableFont, XBrushes.Black, new XPoint(80, yPoint));
+                gfx.DrawString(empleado.Position, tableFont, XBrushes.Black, new XPoint(200, yPoint));
+                gfx.DrawString(empleado.Salary.ToString("C"), tableFont, XBrushes.Black, new XPoint(300, yPoint));
+                gfx.DrawString(empleado.Phone, tableFont, XBrushes.Black, new XPoint(400, yPoint));
+                gfx.DrawString(empleado.Email, tableFont, XBrushes.Black, new XPoint(500, yPoint));
+
+                yPoint += 20;
+
+                // Si llega al final de la página, agregar una nueva página
+                if (yPoint > page.Height - 50)
+                {
+                    page = document.AddPage();
+                    gfx = XGraphics.FromPdfPage(page);
+                    yPoint = 40;
+                }
+            }
+
+            // Guardar el PDF en memoria
+            using (var stream = new MemoryStream())
+            {
+                document.Save(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+
+                // Devolver el PDF como respuesta
+                return File(stream.ToArray(), "application/pdf", "ListaEmpleados.pdf");
             }
         }
 

@@ -62,8 +62,25 @@
 <!-- Script para manejar el token, cargar y actualizar los datos del usuario -->
 <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
 <script>
+        //preloaders
+        function showPreloader() {
+            document.getElementById('preloader').style.display = 'flex';
+        }
+
+        function hidePreloader() {
+            const preloader = document.getElementById('preloader');
+            preloader.style.opacity = "0"; // Suaviza la desaparición
+            preloader.style.transition = "opacity 0.5s ease"; // Efecto de desvanecimiento
+
+            setTimeout(() => {
+                preloader.style.display = "none";
+            }, 500);
+        }
+        //fin preloaders
 
     if (token) {
+        //mostar preloader
+        showPreloader();
         // Decodificar el token usando jwt-decode
         const decodedToken = jwt_decode(token);
 
@@ -101,6 +118,8 @@
                     document.getElementById('userBirthDate').value = cliente.birthDate.split("T")[0]; // Formatear fecha
                     document.getElementById('userPhone').value = cliente.phone;
                     document.getElementById('userAddress').value = cliente.address.replace("\n", ", "); // Reemplazar saltos de línea por comas
+                    //ocultar preloader
+                    hidePreloader();
                 } else {
                     alert('No se encontraron datos para este cliente.');
                 }
