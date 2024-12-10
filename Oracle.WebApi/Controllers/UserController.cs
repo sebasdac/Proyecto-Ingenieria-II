@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using BCrypt.Net;  
+using BCrypt.Net;
 namespace Oracle.WebApi.Controllers
 {
     [Route("api/[controller]")]
@@ -80,16 +80,15 @@ namespace Oracle.WebApi.Controllers
             // Definir los claims (información adicional en el token)
             var claims = new[]
             {
-        new Claim(JwtRegisteredClaimNames.Sub, user.Username),
-        new Claim("role", user.Role),
-        new Claim("userId", user.Id.ToString()),
-        new Claim("customerId", customer.Id.ToString()),
-        new Claim("name", customer.Name), // Nombre del cliente
-        new Claim("cedula", customer.Cedula), // Cédula
-        new Claim("phone", customer.Phone), // Teléfono
-        new Claim("address", customer.Address), // Dirección
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-    };
+            new Claim(JwtRegisteredClaimNames.Sub, user.Username),
+            new Claim("role", user.Role),
+            new Claim("userId", user.Id.ToString()),
+            new Claim("name", customer.Name), // Nombre del cliente
+            new Claim("cedula", customer.Cedula), // Cédula
+            new Claim("phone", customer.Phone), // Teléfono
+            new Claim("address", customer.Address), // Dirección
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
 
             // Obtener la llave secreta del archivo appsettings.json
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
@@ -100,7 +99,7 @@ namespace Oracle.WebApi.Controllers
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(2), // Expiración del token
+                expires: DateTime.UtcNow.AddMinutes(1), // Expiración del token
                 signingCredentials: creds
             );
 
@@ -251,6 +250,41 @@ namespace Oracle.WebApi.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"Se encontró un error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("customer/{id}")]
+        public async Task<ActionResult<object>> BuscarPorIdAndCostumer(long id)
+        {
+            try
+            {
+                Console.WriteLine($"Buscando usuario con ID: {id}");
+
+                // Incluyendo el cliente relacionado utilizando `Include` para cargar los datos del cliente.
+                var usuarioConCliente = await _context.Users
+                    .Where(x => x.Id == id)
+                    .Select(x => new
+                    {
+                        Usuario = x,
+                        Cliente = _context.Customers.FirstOrDefault(c => c.Id == x.CustomerId)
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (usuarioConCliente != null)
+                {
+                    Console.WriteLine($"Usuario encontrado: {usuarioConCliente.Usuario.Username}");
+                    return Ok(usuarioConCliente);
+                }
+                else
+                {
+                    Console.WriteLine($"Usuario con ID {id} no encontrado.");
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al buscar usuario: {ex.Message}");
+                return StatusCode(500, "Error interno del servidor.");
             }
         }
 

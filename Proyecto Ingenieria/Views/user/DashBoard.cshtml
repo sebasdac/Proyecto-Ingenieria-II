@@ -2,7 +2,18 @@
     ViewData["Title"] = "DashBoard";
     Layout = "~/Views/Shared/_head_foot.cshtml";
 }
+<style>
+    
 
+    .form-control {
+        background-color: #f7f7f7; /* Fondo de los campos del formulario */
+        border: 1px solid #d1d1d1; /* Borde de los campos */
+        border-radius: 4px;
+        color: #333; /* Texto oscuro */
+    }
+
+    
+</style>
 <!-- partial -->
 <div class="main-panel">
     <div class="content-wrapper">
@@ -21,73 +32,36 @@
                         </div>
                         <div class="form-group">
                             <label for="userName">NAME</label>
-                            <input type="text" class="form-control" id="userName" placeholder="Enter Name" readonly>
+                            <input type="text" class="form-control" id="userName" placeholder="Enter Name">
                         </div>
                         <div class="form-group">
                             <label for="userCedula">CEDULA</label>
-                            <input type="text" class="form-control" id="userCedula" placeholder="Enter Cedula" readonly>
+                            <input type="text" class="form-control" id="userCedula" placeholder="Enter Cedula">
                         </div>
                         <div class="form-group">
                             <label for="userBirthDate">BIRTH DATE</label>
-                            <input type="date" class="form-control" id="userBirthDate" readonly>
+                            <input type="date" class="form-control" id="userBirthDate">
                         </div>
                         <div class="form-group">
                             <label for="userPhone">PHONE</label>
-                            <input type="tel" class="form-control" id="userPhone" placeholder="Enter Phone" readonly>
+                            <input type="tel" class="form-control" id="userPhone" placeholder="Enter Phone">
                         </div>
                         <div class="form-group">
                             <label for="userAddress">ADDRESS</label>
-                            <input type="text" class="form-control" id="userAddress" placeholder="Enter Address" readonly>
+                            <input type="text" class="form-control" id="userAddress" placeholder="Enter Address">
                         </div>
+                        <button type="button" id="updateButton" class="btn btn-primary">Actualizar</button>
+
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-12 grid-margin">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">Order Status</h4>
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>
-                                            <div class="form-check form-check-muted m-0">
-                                                <label class="form-check-label">
-                                                    <input type="checkbox" class="form-check-input">
-                                                </label>
-                                            </div>
-                                        </th>
-                                        <th> Client Name </th>
-                                        <th> Order No </th>
-                                        <th> Product Cost </th>
-                                        <th> Project </th>
-                                        <th> Payment Mode </th>
-                                        <th> Start Date </th>
-                                        <th> Payment Status </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Rows with orders (this part can be dynamic based on the user's data) -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
+       
 </div>
-
 <!-- Script para manejar el token, cargar y actualizar los datos del usuario -->
 <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
 <script>
-
-    // Obtener el token del localStorage
-    //const token = localStorage.getItem('token');
 
     if (token) {
         // Decodificar el token usando jwt-decode
@@ -97,42 +71,82 @@
         console.log(decodedToken);
 
         // Extraer el userId desde el claim del token
-        const id = decodedToken.customerId; // O ajusta el campo si es diferente
+        const userId = decodedToken.userId; // Ajusta el campo si es diferente
 
-        // Realizar una solicitud para obtener los detalles del usuario
-        fetch(`https://localhost:7277/api/Customers/${id}`, {
+        // Realizar una solicitud a la API generada que incluye usuario y cliente
+        fetch(`https://localhost:7277/api/User/customer/${userId}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             }
         })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 console.log('Datos recibidos de la API:', data); // Verifica los datos recibidos
+                console.log('Id del costumer: ', data.usuario.customer.id)
+                // Acceder al cliente desde el JSON
+                const cliente = data.usuario.customer;
 
-                if (data && data.id) {
-                    // Rellenar los campos del formulario con los datos obtenidos
-                    document.getElementById('userId').value = data.id;
-                    document.getElementById('userName').value = data.name;
-                    document.getElementById('userCedula').value = data.cedula;
-                    document.getElementById('userBirthDate').value = data.birthDate;
-                    document.getElementById('userPhone').value = data.phone;
-                    document.getElementById('userAddress').value = data.address;
+                if (cliente && cliente.id) {
+                    // Rellenar los campos del formulario con los datos del cliente
+                    document.getElementById('userId').value = cliente.id;
+                    document.getElementById('userName').value = cliente.name;
+                    document.getElementById('userCedula').value = cliente.cedula;
+                    document.getElementById('userBirthDate').value = cliente.birthDate.split("T")[0]; // Formatear fecha
+                    document.getElementById('userPhone').value = cliente.phone;
+                    document.getElementById('userAddress').value = cliente.address.replace("\n", ", "); // Reemplazar saltos de línea por comas
                 } else {
-                    alert('No se encontraron datos para este usuario.');
+                    alert('No se encontraron datos para este cliente.');
                 }
             })
             .catch(error => {
-                console.error('Error al obtener los datos del usuario:', error);
-                alert('Hubo un problema al cargar los datos del usuario.');
+                console.error('Error al obtener los datos:', error);
+                alert('Hubo un problema al cargar los datos del usuario/cliente.');
             });
-    
-
-    
     } else {
         // Manejar el caso donde no hay token (redireccionar al login, mostrar mensaje, etc.)
         alert('No estás autenticado. Por favor, inicia sesión.');
         window.location.href = '/login.html';
     }
+    // Manejar la actualización de datos
+    document.getElementById('updateButton').addEventListener('click', () => {
+        // Crear el JSON con los datos del formulario
+        const updatedData = {
+            id: parseInt(document.getElementById('userId').value, 10), // Convertir el ID a número
+            name: document.getElementById('userName').value,
+            cedula: document.getElementById('userCedula').value,
+            birthDate: new Date(document.getElementById('userBirthDate').value).toISOString(), // Convertir a formato ISO
+            phone: document.getElementById('userPhone').value,
+            address: document.getElementById('userAddress').value
+        };
+
+        console.log('Datos a actualizar:', updatedData);
+
+        // Enviar los datos actualizados a la API
+        fetch(`https://localhost:7277/api/Customers`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                alert('Datos actualizados correctamente.');
+            })
+            .catch(error => {
+                console.error('Error al actualizar los datos:', error);
+                alert('Hubo un problema al actualizar los datos.');
+            });
+    });
 </script>
+

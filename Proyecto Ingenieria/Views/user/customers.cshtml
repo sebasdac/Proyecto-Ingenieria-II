@@ -1,0 +1,246 @@
+﻿@{
+    ViewData["Title"] = "customers";
+    Layout = "~/Views/Shared/_head_foot.cshtml";
+}
+
+<div class="container mt-4">
+    <h1>Gestión de Clientes</h1>
+
+    <!-- Campo de búsqueda -->
+    <div class="mb-3">
+        <label for="search" class="form-label">Buscar Cliente:</label>
+        <input type="text" id="search" class="form-control" placeholder="Ingrese ID, nombre o cédula">
+    </div>
+
+    <!-- Botones CRUD -->
+    <div class="mb-3">
+        <button type="button" id="AddButton" class="btn btn-primary">Agregar</button>
+        <button type="button" id="updateButton" class="btn btn-primary">Actualizar</button>
+        <button type="button" id="deleteButton" class="btn btn-primary">Eliminar</button>
+        <button type="button" id="SearchButton" class="btn btn-primary">Buscar</button>
+    </div>
+
+    <!-- Formulario para agregar cliente -->
+    <div class="mb-4">
+        <h2>Agregar Cliente</h2>
+        <form id="addClientForm">
+            <div class="mb-3">
+                <label for="addClientId" class="form-label">ID</label>
+                <input type="text" id="addClientId" class="form-control" placeholder="Ingrese el ID del cliente">
+            </div>
+            <div class="mb-3">
+                <label for="addClientName" class="form-label">Nombre</label>
+                <input type="text" id="addClientName" class="form-control" placeholder="Ingrese el nombre del cliente">
+            </div>
+            <div class="mb-3">
+                <label for="addClientCedula" class="form-label">Cédula</label>
+                <input type="text" id="addClientCedula" class="form-control" placeholder="Ingrese la cédula">
+            </div>
+            <div class="mb-3">
+                <label for="addClientBirthDate" class="form-label">Fecha de Nacimiento</label>
+                <input type="date" id="addClientBirthDate" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label for="addClientPhone" class="form-label">Teléfono</label>
+                <input type="text" id="addClientPhone" class="form-control" placeholder="Ingrese el teléfono">
+            </div>
+            <div class="mb-3">
+                <label for="addClientAddress" class="form-label">Dirección</label>
+                <input type="text" id="addClientAddress" class="form-control" placeholder="Ingrese la dirección">
+            </div>
+            <button type="button" id="saveClientButton" class="btn btn-success">Guardar Cliente</button>
+        </form>
+    </div>
+
+    <!-- Tabla de clientes -->
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Cédula</th>
+                <th>Fecha de Nacimiento</th>
+                <th>Teléfono</th>
+                <th>Dirección</th>
+            </tr>
+        </thead>
+        <tbody id="clientesTable">
+            <!-- Aquí se llenarán los datos dinámicamente -->
+        </tbody>
+    </table>
+</div>
+<script>
+    document.getElementById("SearchButton").addEventListener("click", function () {
+        const id = document.getElementById("search").value; // Obtiene el valor del input
+        if (id) {
+            fetchClientePorId(id);
+        } else {
+            alert("Por favor, ingrese un ID en el campo de búsqueda.");
+        }
+    });
+
+    function fetchClientePorId(id) {
+        fetch(`https://localhost:7277/api/Customers/${id}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'text/plain',
+            },
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al obtener el cliente.');
+                }
+                return response.json();
+            })
+            .then(cliente => {
+                agregarClienteATabla(cliente);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('No se pudo obtener el cliente.');
+            });
+    }
+
+    function agregarClienteATabla(cliente) {
+        const { id, name, cedula, birthDate, phone, address } = cliente;
+
+        // Verifica si el cliente ya está en la tabla
+        const tabla = document.getElementById("clientesTable");
+        const filas = tabla.getElementsByTagName("tr");
+        for (let i = 0; i < filas.length; i++) {
+            if (filas[i].dataset.id === String(id)) {
+                alert("El cliente ya está en la tabla.");
+                return;
+            }
+        }
+
+        // Crea una nueva fila
+        const nuevaFila = document.createElement("tr");
+        nuevaFila.dataset.id = id; // Asigna el ID como atributo de la fila
+
+        nuevaFila.innerHTML = `
+                <td>${id}</td>
+                <td>${name}</td>
+                <td>${cedula}</td>
+                <td>${birthDate}</td>
+                <td>${phone}</td>
+                <td>${address}</td>
+            `;
+
+        // Agrega la nueva fila a la tabla
+        tabla.appendChild(nuevaFila);
+    }
+
+    document.getElementById("saveClientButton").addEventListener("click", function () {
+        const id = document.getElementById("addClientId").value;
+        const name = document.getElementById("addClientName").value;
+        const cedula = document.getElementById("addClientCedula").value;
+        const birthDate = document.getElementById("addClientBirthDate").value;
+        const phone = document.getElementById("addClientPhone").value;
+        const address = document.getElementById("addClientAddress").value;
+
+        if (!id || !name || !cedula || !birthDate || !phone || !address) {
+            alert("Por favor, complete todos los campos.");
+            return;
+        }
+
+        const cliente = {
+            id: parseInt(id),
+            name: name,
+            cedula: cedula,
+            birthDate: new Date(birthDate).toISOString(), // Convierte la fecha a formato ISO 8601
+            phone: phone,
+            address: address
+        };
+
+        // Enviar el cliente a la API
+        fetch("https://localhost:7277/api/Customers", {
+            method: "POST",
+            headers: {
+                "Accept": "text/plain",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(cliente)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Error al guardar el cliente.");
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert("Cliente agregado correctamente.");
+                agregarClienteATabla(data); // Agrega el cliente a la tabla
+                limpiarFormularioAgregarCliente(); // Limpia el formulario
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("No se pudo guardar el cliente.");
+            });
+    });
+
+    function agregarClienteATabla(cliente) {
+        const { id, name, cedula, birthDate, phone, address } = cliente;
+
+        const tabla = document.getElementById("clientesTable");
+        const nuevaFila = document.createElement("tr");
+        nuevaFila.dataset.id = id;
+
+        nuevaFila.innerHTML = `
+                <td>${id}</td>
+                <td>${name}</td>
+                <td>${cedula}</td>
+                <td>${birthDate}</td>
+                <td>${phone}</td>
+                <td>${address}</td>
+            `;
+
+        tabla.appendChild(nuevaFila);
+    }
+
+    function limpiarFormularioAgregarCliente() {
+        document.getElementById("addClientForm").reset();
+    }
+
+    document.getElementById("deleteButton").addEventListener("click", function () {
+        const id = document.getElementById("search").value; // Obtiene el valor del campo de texto de búsqueda
+        if (!id) {
+            alert("Por favor, ingrese un ID en el campo de búsqueda.");
+            return;
+        }
+        eliminarClientePorId(id);
+    });
+
+    function eliminarClientePorId(id) {
+        fetch(`https://localhost:7277/api/Customers/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Accept": "*/*"
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error al eliminar el cliente con ID ${id}.`);
+                }
+                alert(`Cliente con ID ${id} eliminado correctamente.`);
+                eliminarClienteDeTabla(id);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("No se pudo eliminar el cliente.");
+            });
+    }
+
+    function eliminarClienteDeTabla(id) {
+        const tabla = document.getElementById("clientesTable");
+        const filas = tabla.getElementsByTagName("tr");
+        for (let i = 0; i < filas.length; i++) {
+            if (filas[i].dataset.id === String(id)) {
+                tabla.removeChild(filas[i]);
+                return;
+            }
+        }
+        alert("El cliente no se encontró en la tabla.");
+    }
+</script>
+
