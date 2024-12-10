@@ -1,0 +1,331 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Summary</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .car-details {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, #007BFF, #6A11CB);
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .car-image {
+            flex: 1;
+            max-width: 200px;
+            margin-right: 20px;
+        }
+
+            .car-image img {
+                width: 100%;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+
+        .car-info {
+            flex: 2;
+        }
+
+            .car-info p {
+                font-size: 18px;
+                margin: 10px 0;
+                color: #fff;
+            }
+
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+
+        .details-wrapper {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .details-column {
+            flex: 1;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        #payment-section {
+            text-align: center;
+        }
+
+            #payment-section h2 {
+                margin-bottom: 10px;
+            }
+
+            #payment-section button {
+                margin: 0;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Order Summary</h1>
+
+        <!-- Car Details Section -->
+        <div class="car-details">
+            <div class="car-image">
+                <img id="car-image" src="/PurchaseSection/images/placeholder.jpg" alt="Car Image">
+            </div>
+            <div class="car-info">
+                <p id="car-model">Model: </p>
+                <p id="car-year">Year: </p>
+                <p id="car-color">Color: </p>
+                <p id="car-transmission">Transmission: </p>
+                <p id="car-price">Price: </p>
+            </div>
+        </div>
+        <button onclick="goBack()">Modify Order</button>
+
+        <!-- Additional Details -->
+        <!-- Additional Details -->
+        <div class="details-wrapper">
+            <!-- Person Details -->
+            <div id="person-details" class="details-column">
+                <h2>Customer Details</h2>
+                <div id="customer-info">
+                    <!-- Customer details will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Payment Section -->
+            <div id="payment-section" class="details-column">
+                <h2>Payment</h2>
+                <button onclick="submitOrder()">Confirmar orden</button>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to decode a JWT
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(
+                    atob(base64)
+                        .split('')
+                        .map(function (c) {
+                            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                        })
+                        .join('')
+                );
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // Function to check if the token is expired
+        function isTokenExpired(token) {
+            const decoded = parseJwt(token);
+            if (!decoded || !decoded.exp) return true; // If no exp claim, consider expired
+            const now = Math.floor(Date.now() / 1000); // Current time in seconds
+            return decoded.exp < now; // Compare expiration time with current time
+        }
+
+        // Check for JWT and populate customer details
+        function loadCustomerDetails() {
+            const jwt = localStorage.getItem('token');
+            const customerInfoDiv = document.getElementById('customer-info');
+
+            if (jwt) {
+                if (isTokenExpired(jwt)) {
+                    // If token is expired, show login button
+                    customerInfoDiv.innerHTML = `
+                            <p>Session expired. Please log in again.</p>
+                            <div class="login-button">
+                                <button onclick="redirectToLogin()">Log In</button>
+                            </div>
+                        `;
+                    return;
+                }
+
+                const customerData = parseJwt(jwt);
+                if (customerData) {
+                    customerInfoDiv.innerHTML = `
+                            <p>Name: ${customerData.name}</p>
+                            <p>ID: ${customerData.cedula}</p>
+                            <p>Phone: ${customerData.phone}</p>
+                            <p>Address: ${customerData.address}</p>
+                        `;
+                } else {
+                    customerInfoDiv.innerHTML = `
+                            <p>Invalid token. Please log in again.</p>
+                            <div class="login-button">
+                                <button onclick="redirectToLogin()">Log In</button>
+                            </div>
+                        `;
+                }
+            } else {
+                customerInfoDiv.innerHTML = `
+                        <p>No customer data available. Please log in.</p>
+                        <div class="login-button">
+                            <button onclick="redirectToLogin()">Log In</button>
+                        </div>
+                    `;
+            }
+        }
+
+        // Redirect to login page
+        function redirectToLogin() {
+            window.location.href = '/Account';
+        }
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCustomerDetails();
+        });
+
+        // Load order details from localStorage
+        const orderData = JSON.parse(localStorage.getItem('orderData'));
+
+        if (orderData) {
+            document.getElementById('car-model').innerText = `Model: ${orderData.model}`;
+            document.getElementById('car-year').innerText = `Year: ${orderData.year}`;
+            document.getElementById('car-color').innerText = `Color: ${orderData.color}`;
+            document.getElementById('car-transmission').innerText = `Transmission: ${orderData.transmission}`;
+            document.getElementById('car-price').innerText = `Price: $${orderData.price}`;
+            document.getElementById('car-image').src = `/PurchaseSection/images/${orderData.model.toLowerCase().replace(/\s+/g, '-')}.jpg`;
+        } else {
+            alert('No order data found.');
+        }
+
+        // Go back to modify order
+        function goBack() {
+            window.location.href = '/PurchaseSection';
+        }
+
+        // Process payment action
+        function processPayment() {
+            alert('Redirecting to payment gateway...');
+            // Add actual payment gateway redirection here
+        }
+
+
+        //parte de pagos
+ 
+            // Función para obtener datos del cliente a partir del JWT
+            function getCustomerDataFromToken() {
+                const jwt = localStorage.getItem('token');
+                if (!jwt) return null;
+
+                const payload = parseJwt(jwt);
+                return payload ? {
+                    name: payload.name,
+                    cedula: payload.cedula,
+                    phone: payload.phone,
+                    address: payload.address
+                } : null;
+            }
+
+        async function submitOrder() {
+            const orderData = JSON.parse(localStorage.getItem('orderData'));
+            const customerData = getCustomerDataFromToken();
+
+            if (!orderData || !customerData) {
+                alert('Faltan datos para crear la orden. Por favor revisa tu sesión y la información del auto.');
+                return;
+            }
+
+            // Construir el objeto order que la API espera
+            const order = {
+                // Puedes generar un número de orden o usar uno fijo; aquí usamos una marca de tiempo
+                orderNumber: "ORD-" + Date.now(),
+                customerName: customerData.name,
+                carModel: orderData.model,
+                orderStatus: "Pendiente",    // Por ejemplo, un estado inicial
+                orderDate: new Date().toISOString(),
+                // Puedes crear una factura inicial si lo deseas
+                invoices: [
+                    {
+                        invoiceDate: new Date().toISOString(),
+                        totalAmount: parseFloat(orderData.price),
+                        status: "Pendiente"
+                    }
+                ]
+            };
+
+            try {
+                const response = await fetch('https://localhost:7277/api/Order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(order)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText);
+                }
+
+                const createdOrder = await response.json();
+                console.log('Orden creada exitosamente:', createdOrder);
+                alert('¡Orden creada con éxito!');
+                // Aquí puedes redirigir a otra página o limpiar el localStorage
+            } catch (error) {
+                console.error('Error al crear la orden:', error);
+                alert('Ocurrió un error al crear la orden. Revisa la consola para más detalles.');
+            }
+        }
+
+    </script>
+
+
+</body>
+</html>
+

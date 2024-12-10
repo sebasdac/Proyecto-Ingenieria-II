@@ -1,0 +1,120 @@
+﻿
+@{
+    ViewData["Title"] = "Reportes";
+    Layout = "~/Views/Shared/_head_foot.cshtml";
+    }
+
+
+ <div class="main-panel">
+    <div class="content-wrapper">
+        <div class="form-group">
+            <h2>Reporte de carros</h2>
+            <button id="downloadCarsBtn" class="btn btn-sm btn-primary" type="button">Descargar todos los carros</button>
+            <h2>Reporte de pedidos</h2>
+            <button id="downloadInvoicesBtn" class="btn btn-sm btn-primary admin-only" type="button">Descargar todas las facturas</button>
+            <h2>Reporte de empleados</h2>
+            <button id="downloadEmployeesBtn" class="btn btn-sm btn-primary admin-only" type="button">Descargar todas los empleados</button>
+        </div>
+        </div>
+    </div>
+<script>
+    document.getElementById('downloadInvoicesBtn').addEventListener('click', async function () {
+        try {
+            // Realiza la solicitud GET al endpoint que devuelve el PDF
+            const response = await fetch('https://localhost:7277/api/OrdersPdf/GetOrdersPdf', {
+                method: 'GET'
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al descargar el PDF.');
+            }
+
+            // Convierte la respuesta a un Blob (que representa el archivo binario del PDF)
+            const blob = await response.blob();
+
+            // Crea una URL temporal en el navegador para descargar el archivo
+            const url = window.URL.createObjectURL(blob);
+
+            // Crea un elemento <a> temporal para "simular" la descarga del archivo
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ListadoOrdenes.pdf'; // Nombre por defecto del archivo al descargar
+            document.body.appendChild(a);
+            a.click();
+
+            // Limpia los elementos temporales
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Ocurrió un error al descargar el PDF:', error);
+            alert('No se pudo descargar el PDF. Revisa la consola para más detalles.');
+        }
+    });
+    document.getElementById('downloadCarsBtn').addEventListener('click', async function () {
+        try {
+            // Realiza la solicitud GET al endpoint que devuelve el PDF
+            const response = await fetch('https://localhost:7277/api/Car/pdf', {
+                method: 'GET'
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al descargar el PDF.');
+            }
+
+            // Convierte la respuesta a un Blob (que representa el archivo binario del PDF)
+            const blob = await response.blob();
+
+            // Crea una URL temporal en el navegador para descargar el archivo
+            const url = window.URL.createObjectURL(blob);
+
+            // Crea un elemento <a> temporal para "simular" la descarga del archivo
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ListadoCarros.pdf'; // Nombre por defecto del archivo al descargar
+            document.body.appendChild(a);
+            a.click();
+
+            // Limpia los elementos temporales
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Ocurrió un error al descargar el PDF:', error);
+            alert('No se pudo descargar el PDF. Revisa la consola para más detalles.');
+        }
+    });
+    document.getElementById('downloadEmployeesBtn').addEventListener('click', async function () {
+        try {
+            // Realiza la solicitud GET al endpoint que devuelve el PDF
+            const response = await fetch('https://localhost:7277/api/Employee/ExportarEmpleadosPDF', {
+                method: 'GET'
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al descargar el PDF.');
+            }
+
+            // Convierte la respuesta a un Blob (que representa el archivo binario del PDF)
+            const blob = await response.blob();
+
+            // Crea una URL temporal en el navegador para descargar el archivo
+            const url = window.URL.createObjectURL(blob);
+
+            // Crea un elemento <a> temporal para "simular" la descarga del archivo
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ListadoEmpleados.pdf'; // Nombre por defecto del archivo al descargar
+            document.body.appendChild(a);
+            a.click();
+
+            // Limpia los elementos temporales
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Ocurrió un error al descargar el PDF:', error);
+            alert('No se pudo descargar el PDF. Revisa la consola para más detalles.');
+        }
+    });
+
+
+</script>
+

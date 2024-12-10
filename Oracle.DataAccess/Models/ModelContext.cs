@@ -123,7 +123,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Car)
                     .WithMany(p => p.CarDetails)
                     .HasForeignKey(d => d.CarId)
-                    .HasConstraintName("SYS_C007678");
+                    .HasConstraintName("SYS_C008375");
             });
 
             modelBuilder.Entity<CarSale>(entity =>
@@ -214,7 +214,7 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("CUSTOMERS");
 
-                entity.HasIndex(e => e.Cedula, "SYS_C007630")
+                entity.HasIndex(e => e.Cedula, "SYS_C008347")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
@@ -251,10 +251,10 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("EMPLOYEES");
 
-                entity.HasIndex(e => e.Cedula, "SYS_C007616")
+                entity.HasIndex(e => e.Cedula, "SYS_C008333")
                     .IsUnique();
 
-                entity.HasIndex(e => e.Email, "SYS_C007617")
+                entity.HasIndex(e => e.Email, "SYS_C008334")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
@@ -330,7 +330,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.Invoices)
                     .HasForeignKey(d => d.OrderId)
-                    .HasConstraintName("SYS_C007665");
+                    .HasConstraintName("SYS_C008376");
             });
 
             modelBuilder.Entity<Order>(entity =>
@@ -371,7 +371,7 @@ namespace Oracle.DataAccess.Models
             {
                 entity.ToTable("USERS");
 
-                entity.HasIndex(e => e.Username, "SYS_C007603")
+                entity.HasIndex(e => e.Username, "SYS_C008322")
                     .IsUnique();
 
                 entity.Property(e => e.Id)
@@ -443,7 +443,7 @@ namespace Oracle.DataAccess.Models
                 entity.HasOne(d => d.Employee)
                     .WithMany(p => p.VacationRequests)
                     .HasForeignKey(d => d.EmployeeId)
-                    .HasConstraintName("SYS_C007667");
+                    .HasConstraintName("SYS_C008378");
             });
 
             modelBuilder.HasSequence("CAR_DETAILS_SEQ");

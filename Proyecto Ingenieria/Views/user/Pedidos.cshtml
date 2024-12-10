@@ -1,0 +1,229 @@
+﻿
+@{
+    ViewData["Title"] = "Pedidos";
+    Layout = "~/Views/Shared/_head_foot.cshtml";
+}
+
+<main>
+    
+    <!-- Fin Preloader -->
+    <div class="container-fluid px-4">
+        
+        
+
+        <!-- Alerta de Éxito -->
+        <div id="successAlert" class="alert alert-success d-none" role="alert">
+            ¡Factura creada con éxito!
+        </div>
+
+        <!-- Formulario para Generar Facturas -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-plus me-1"></i>
+                Generar Factura
+            </div>
+            <div class="card-body">
+                <form id="createInvoiceForm">
+                    <div class="mb-3">
+                        <label for="orderId" class="form-label">ID de Orden</label>
+                        <input type="number" class="form-control" id="orderId" placeholder="Ingrese el ID de la orden" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="totalAmount" class="form-label">Monto Total</label>
+                        <input type="number" class="form-control" id="totalAmount" placeholder="Ingrese el monto total" step="0.01" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Estado</label>
+                        <select class="form-control" id="status" required>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Pagado">Pagado</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Crear Factura</button>
+                </form>
+            </div>
+        </div>
+        <!-- Tabla para Mostrar Facturas -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table me-1"></i>
+                Lista de Facturas
+            </div>
+            <div class="card-body">
+                <table id="invoiceTable" class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ID Orden</th>
+                            <th>Fecha</th>
+                            <th>Monto Total</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Las filas se llenarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+
+        </div>
+    </div>
+</main>
+
+<script>
+    //preloaders
+    function showPreloader() {
+        document.getElementById('preloader').style.display = 'flex';
+    }
+
+    function hidePreloader() {
+        const preloader = document.getElementById('preloader');
+        preloader.style.opacity = "0"; // Suaviza la desaparición
+        preloader.style.transition = "opacity 0.5s ease"; // Efecto de desvanecimiento
+
+        setTimeout(() => {
+            preloader.style.display = "none";
+        }, 500);
+    }
+    //fin preloaders
+
+    function updateInvoiceStatus(invoiceId) {
+        const status = document.getElementById(`status-${invoiceId}`).value;
+
+        const updatedInvoice = {
+            id: invoiceId,
+            status: status
+        };
+        
+
+        fetch(`https://localhost:7277/api/invoices/${invoiceId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedInvoice)
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+            })
+            .then(data => {
+                console.log("Factura actualizada:", data);
+                showSuccessAlert();
+            })
+            .catch(error => {
+                console.error("Error al actualizar la factura:", error);
+
+            });
+    }
+
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const invoiceTableElement = document.getElementById("invoiceTable");
+        const createInvoiceForm = document.getElementById("createInvoiceForm");
+        const successAlert = document.getElementById("successAlert");
+
+        if (!invoiceTableElement) {
+            console.error("La tabla con ID 'invoiceTable' no existe en el DOM.");
+            return;
+        }
+
+        const invoiceTable = invoiceTableElement.querySelector("tbody");
+        if (!invoiceTable) {
+            console.error("El elemento tbody de la tabla no se encontró.");
+            return;
+        }
+
+        function showSuccessAlert() {
+            successAlert.classList.remove("d-none");
+            setTimeout(() => {
+                successAlert.classList.add("d-none");
+            }, 3000);
+        }
+
+
+        function loadInvoices() {
+            showPreloader()
+            fetch('https://localhost:7277/api/invoices')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const invoices = data.$values || [];
+                    invoiceTable.innerHTML = '';
+
+                    invoices.forEach(invoice => {
+                        const row = invoiceTable.insertRow();
+                        row.innerHTML = `
+                                        <td>${invoice.id}</td>
+                                        <td>${invoice.orderId || 'N/A'}</td>
+                                        <td>${new Date(invoice.invoiceDate).toLocaleDateString()}</td>
+                                        <td>${invoice.totalAmount.toFixed(2)}</td>
+                                        <td>
+                                            <select class="form-control" id="status-${invoice.id}" onchange="updateInvoiceStatus(${invoice.id})">
+                                                <option value="Pendiente" ${invoice.status === "Pendiente" ? 'selected' : ''}>Pendiente</option>
+                                                <option value="Pagado" ${invoice.status === "Pagado" ? 'selected' : ''}>Pagado</option>
+                                                <option value="Cancelado" ${invoice.status === "Cancelado" ? 'selected' : ''}>Cancelado</option>
+                                            </select>
+                                        </td>
+                                    `;
+                    });
+                    hidePreloader();
+                })
+                .catch(error => {
+                    console.error("Error al cargar las facturas:", error);
+                    alert("No se pudieron cargar las facturas.");
+                });
+        }
+
+
+        createInvoiceForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const invoiceData = {
+                id: 0,
+                orderId: parseInt(document.getElementById("orderId").value, 10),
+                invoiceDate: new Date().toISOString(),
+                totalAmount: parseFloat(document.getElementById("totalAmount").value),
+                status: document.getElementById("status").value,
+                order: null
+            };
+
+            console.log("Datos enviados a la API:", invoiceData);
+
+            fetch('https://localhost:7277/api/invoices', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(invoiceData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    showSuccessAlert();
+                    loadInvoices();
+                    createInvoiceForm.reset();
+                })
+                .catch(error => {
+                    console.error("Error al crear la factura:", error);
+                    alert("No se pudo crear la factura. Verifica los datos ingresados.");
+                });
+        });
+
+        loadInvoices();
+    });
+</script>

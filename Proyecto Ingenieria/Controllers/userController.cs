@@ -16,10 +16,15 @@ namespace Proyecto.Controllers
 
             return View();
         }
-        public IActionResult Charts()
+        public IActionResult Facturas()
         {
             return View();
         }
+        public IActionResult Inventario()
+        {
+            return View();
+        }
+        //
         public IActionResult Forms()
         {
             return View();
@@ -28,7 +33,15 @@ namespace Proyecto.Controllers
         {
             return View();
         }
-        public IActionResult Tables()
+        public IActionResult customers()
+        {
+            return View();
+        }
+        public IActionResult employees()
+        {
+            return View();
+        }
+        public IActionResult Carros()
         {
             return View();
         }
@@ -49,6 +62,18 @@ namespace Proyecto.Controllers
             return View();
         }
 
+        public IActionResult Orders()
+        {
+            return View();
+        }
+        public IActionResult Pedidos()
+        {
+            return View();
+        }
+        public IActionResult Reportes()
+        {
+            return View();
+        }
 
 
     }
