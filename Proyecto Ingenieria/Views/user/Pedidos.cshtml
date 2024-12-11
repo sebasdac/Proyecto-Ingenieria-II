@@ -149,8 +149,9 @@
 
 
         function loadInvoices() {
-            showPreloader()
-            fetch('https://localhost:7277/api/invoices')
+            showPreloader(); // Mostrar preloader mientras se cargan los datos
+
+            fetch('https://localhost:7277/api/Order/GetAllOrders')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error ${response.status}`);
@@ -158,32 +159,51 @@
                     return response.json();
                 })
                 .then(data => {
-                    const invoices = data.$values || [];
-                    invoiceTable.innerHTML = '';
+                    const orders = data.$values || []; // Acceder a $values que contiene las órdenes
+                    const invoices = []; // Acumulador para todas las facturas
+
+                    // Extraer facturas de cada orden
+                    orders.forEach(order => {
+                        if (order.invoices && order.invoices.$values) {
+                            order.invoices.$values.forEach(invoice => {
+                                invoices.push({
+                                    ...invoice,
+                                    orderNumber: order.orderNumber // Asociar la orden a la factura
+                                });
+                            });
+                        }
+                    });
+
+                    // Renderizar facturas en la tabla
+                    invoiceTable.innerHTML = ''; // Limpiar la tabla
 
                     invoices.forEach(invoice => {
                         const row = invoiceTable.insertRow();
                         row.innerHTML = `
-                                        <td>${invoice.id}</td>
-                                        <td>${invoice.orderId || 'N/A'}</td>
-                                        <td>${new Date(invoice.invoiceDate).toLocaleDateString()}</td>
-                                        <td>${invoice.totalAmount.toFixed(2)}</td>
-                                        <td>
-                                            <select class="form-control" id="status-${invoice.id}" onchange="updateInvoiceStatus(${invoice.id})">
-                                                <option value="Pendiente" ${invoice.status === "Pendiente" ? 'selected' : ''}>Pendiente</option>
-                                                <option value="Pagado" ${invoice.status === "Pagado" ? 'selected' : ''}>Pagado</option>
-                                                <option value="Cancelado" ${invoice.status === "Cancelado" ? 'selected' : ''}>Cancelado</option>
-                                            </select>
-                                        </td>
-                                    `;
+                        <td>${invoice.id}</td>
+                        <td>${invoice.orderNumber || 'N/A'}</td>
+                        <td>${new Date(invoice.invoiceDate).toLocaleDateString()}</td>
+                        <td>${invoice.totalAmount.toFixed(2)}</td>
+                        <td>
+                            <select class="form-control" id="status-${invoice.id}" onchange="updateInvoiceStatus(${invoice.id})">
+                                <option value="Pendiente" ${invoice.status === "Pendiente" ? 'selected' : ''}>Pendiente</option>
+                                <option value="Pagado" ${invoice.status === "Pagado" ? 'selected' : ''}>Pagado</option>
+                                <option value="Cancelado" ${invoice.status === "Cancelado" ? 'selected' : ''}>Cancelado</option>
+                            </select>
+                        </td>
+                    `;
                     });
-                    hidePreloader();
+
+                    hidePreloader(); // Ocultar el preloader después de cargar los datos
                 })
                 .catch(error => {
                     console.error("Error al cargar las facturas:", error);
                     alert("No se pudieron cargar las facturas.");
+                    hidePreloader(); // Ocultar el preloader en caso de error
                 });
         }
+
+
 
 
         createInvoiceForm.addEventListener("submit", function (e) {

@@ -108,5 +108,89 @@ namespace Oracle.WebApi.Controllers
                 }
             }
         }
+
+        [HttpGet("GetOrderPdf/{orderNumber}")]
+        public async Task<IActionResult> GetOrderPdf(string orderNumber)
+        {
+            // 1. Obtener la orden con sus facturas usando OrderNumber
+            var order = await _context.Orders
+                                      .Include(o => o.Invoices)
+                                      .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber);
+
+            if (order == null)
+            {
+                return NotFound($"No se encontró la orden con el número {orderNumber}");
+            }
+
+            // 2. Crear el documento PDF
+            using (var document = new PdfSharp.Pdf.PdfDocument())
+            {
+                document.Info.Title = $"Orden {order.OrderNumber}";
+
+                var font = new PdfSharp.Drawing.XFont("Arial", 12);
+                var page = document.AddPage();
+                var gfx = PdfSharp.Drawing.XGraphics.FromPdfPage(page);
+
+                int startY = 20;
+                int lineHeight = 20;
+
+                // Escribir datos de la orden
+                gfx.DrawString($"Orden: {order.OrderNumber}", font, PdfSharp.Drawing.XBrushes.Black,
+                               new PdfSharp.Drawing.XRect(20, startY, page.Width - 40, page.Height - 40),
+                               PdfSharp.Drawing.XStringFormats.TopLeft);
+                startY += lineHeight;
+
+                gfx.DrawString($"Cliente: {order.CustomerName}", font, PdfSharp.Drawing.XBrushes.Black,
+                               new PdfSharp.Drawing.XRect(20, startY, page.Width - 40, page.Height - 40),
+                               PdfSharp.Drawing.XStringFormats.TopLeft);
+                startY += lineHeight;
+
+                gfx.DrawString($"Modelo de Auto: {order.CarModel}", font, PdfSharp.Drawing.XBrushes.Black,
+                               new PdfSharp.Drawing.XRect(20, startY, page.Width - 40, page.Height - 40),
+                               PdfSharp.Drawing.XStringFormats.TopLeft);
+                startY += lineHeight;
+
+                gfx.DrawString($"Fecha: {order.OrderDate:dd/MM/yyyy}", font, PdfSharp.Drawing.XBrushes.Black,
+                               new PdfSharp.Drawing.XRect(20, startY, page.Width - 40, page.Height - 40),
+                               PdfSharp.Drawing.XStringFormats.TopLeft);
+                startY += lineHeight;
+
+                // Imprimir facturas
+                gfx.DrawString("Facturas:", font, PdfSharp.Drawing.XBrushes.Black,
+                               new PdfSharp.Drawing.XRect(20, startY, page.Width - 40, page.Height - 40),
+                               PdfSharp.Drawing.XStringFormats.TopLeft);
+                startY += lineHeight;
+
+                if (order.Invoices != null && order.Invoices.Any())
+                {
+                    foreach (var invoice in order.Invoices)
+                    {
+                        gfx.DrawString($"- Id: {invoice.Id}, Monto: {invoice.TotalAmount}, Estado: {invoice.Status}, Fecha: {invoice.InvoiceDate:dd/MM/yyyy}",
+                                       font, PdfSharp.Drawing.XBrushes.Black,
+                                       new PdfSharp.Drawing.XRect(40, startY, page.Width - 60, page.Height - 40),
+                                       PdfSharp.Drawing.XStringFormats.TopLeft);
+                        startY += lineHeight;
+                    }
+                }
+                else
+                {
+                    gfx.DrawString("No hay facturas", font, PdfSharp.Drawing.XBrushes.Black,
+                                   new PdfSharp.Drawing.XRect(40, startY, page.Width - 60, page.Height - 40),
+                                   PdfSharp.Drawing.XStringFormats.TopLeft);
+                    startY += lineHeight;
+                }
+
+                // 3. Guardar en memoria
+                using (var ms = new System.IO.MemoryStream())
+                {
+                    document.Save(ms, false);
+                    ms.Position = 0;
+
+                    // 4. Devolver el PDF
+                    return File(ms.ToArray(), "application/pdf", $"Orden_{order.OrderNumber}.pdf");
+                }
+            }
+        }
+
     }
 }
