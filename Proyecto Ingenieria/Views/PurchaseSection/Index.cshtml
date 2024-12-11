@@ -510,6 +510,35 @@
                 const createdOrder = await response.json();
                 console.log('Orden creada exitosamente:', createdOrder);
                 alert(`¡Orden creada con éxito! Su numero de orden es: ${order.orderNumber}`);
+                //resta
+                const requestData = {
+                    id: orderData.id, // ID del carro
+                    color: orderData.color, // Color del carro
+                    transmission: orderData.transmission // Tipo de transmisión
+                };
+
+                try {
+                    // Llamada a la API
+                    const response = await fetch('https://localhost:7277/api/Car/decrease-stock', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        alert(data.Message + " Nuevo stock: " + data.Stock);
+                    } else {
+                        const error = await response.json();
+                        console.error('Error de la API:', error); // Log del error de la API
+                        alert("Error: " + error.Message);
+                    }
+                } catch (error) {
+                    console.error('Error en la solicitud:', error); // Log del error del cliente
+                    alert("Hubo un problema al realizar la compra.");
+                }
                 // Aquí puedes redirigir a otra página o limpiar el localStorage
                 window.location.href = '/Store';
             } catch (error) {
@@ -517,6 +546,41 @@
                 alert('Ocurrió un error al crear la orden. Revisa la consola para más detalles.');
             }
         }
+        //resta
+        // async function reduceStock() {
+            
+        //     console.log('Order DAta: ', orderData)
+        //     // Datos para enviar a la API
+        //     const requestData = {
+        //         id: orderData.id, // ID del carro
+        //         color: orderData.color, // Color del carro
+        //         transmission: orderData.transmission // Tipo de transmisión
+        //     };
+
+        //     try {
+        //         // Llamada a la API
+        //         const response = await fetch('https://localhost:7277/api/Car/decrease-stock', {
+        //             method: 'POST',
+        //             headers: {
+        //                 'Content-Type': 'application/json'
+        //             },
+        //             body: JSON.stringify(requestData)
+        //         });
+
+        //         if (response.ok) {
+        //             const data = await response.json();
+        //             alert(data.Message + " Nuevo stock: " + data.Stock);
+        //         } else {
+        //             const error = await response.json();
+        //             console.error('Error de la API:', error); // Log del error de la API
+        //             alert("Error: " + error.Message);
+        //         }
+        //     } catch (error) {
+        //         console.error('Error en la solicitud:', error); // Log del error del cliente
+        //         alert("Hubo un problema al realizar la compra.");
+        //     }
+
+        // }
 
     </script>
 

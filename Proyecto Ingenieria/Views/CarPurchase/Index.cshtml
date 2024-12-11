@@ -166,6 +166,7 @@
             if (selectedDetail) {
                 // Usa directamente los valores cargados desde la API
                 const orderData = {
+                    id: carId,
                     model: document.getElementById('car-model').innerText, // Modelo mostrado en la interfaz
                     year: document.getElementById('car-year').innerText,  // Año mostrado en la interfaz
                     color: selectedColor,
