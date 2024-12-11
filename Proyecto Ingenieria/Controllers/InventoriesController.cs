@@ -7,7 +7,7 @@ namespace ProyectoIngenieria.Controllers
         public IActionResult Index()
         {
             // Retorna la vista Inventory_management.cshtml
-            return View("Inventory_management");
+            return View("Inventario");
         }
     }
 }

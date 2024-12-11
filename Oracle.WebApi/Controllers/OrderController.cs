@@ -217,6 +217,82 @@ namespace Oracle.WebApi.Controllers
             }
         }
 
-        
+        //obtener orden por su Order ID
+        [HttpGet("GetOrderJson/{orderNumber}")]
+        public async Task<IActionResult> GetOrderJson(string orderNumber)
+        {
+            // Validar que el número de orden no sea nulo o vacío
+            if (string.IsNullOrWhiteSpace(orderNumber))
+            {
+                return BadRequest("El número de orden no puede estar vacío.");
+            }
+
+            // Obtener la orden con sus facturas usando OrderNumber
+            var order = await _context.Orders
+                                      .Include(o => o.Invoices)
+                                      .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber);
+
+            if (order == null)
+            {
+                return NotFound(new { Message = $"No se encontró la orden con el número {orderNumber}" });
+            }
+
+            // Preparar la respuesta JSON
+            var result = new
+            {
+                order.OrderNumber,
+                order.CustomerName,
+                order.CarModel,
+                order.OrderStatus,
+                OrderDate = order.OrderDate.ToString("yyyy-MM-dd"),
+                Invoices = order.Invoices.Select(invoice => new
+                {
+                    invoice.Id,
+                    invoice.TotalAmount,
+                    invoice.Status,
+                    InvoiceDate = invoice.InvoiceDate.ToString("yyyy-MM-dd")
+                })
+            };
+
+            return Ok(result);
+        }
+
+        //traer todas las ordenes con sus facturas
+        [HttpGet("GetAllOrders")]
+        public async Task<IActionResult> GetAllOrders()
+        {
+            // Obtener todas las órdenes con sus facturas
+            var orders = await _context.Orders
+                                       .Include(o => o.Invoices)
+                                       .ToListAsync();
+
+            if (orders == null || !orders.Any())
+            {
+                return NotFound(new { Message = "No se encontraron órdenes en la base de datos." });
+            }
+
+            // Preparar la respuesta JSON
+            var result = orders.Select(order => new
+            {
+                order.OrderNumber,
+                order.CustomerName,
+                order.CarModel,
+                order.OrderStatus,
+                OrderDate = order.OrderDate.ToString("yyyy-MM-dd"),
+                Invoices = order.Invoices.Select(invoice => new
+                {
+                    invoice.Id,
+                    invoice.TotalAmount,
+                    invoice.Status,
+                    InvoiceDate = invoice.InvoiceDate.ToString("yyyy-MM-dd")
+                })
+            });
+
+            return Ok(result);
+        }
+
+
+
+
     }
 }

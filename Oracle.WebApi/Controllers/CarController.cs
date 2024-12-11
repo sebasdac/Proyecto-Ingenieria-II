@@ -17,6 +17,9 @@ namespace Oracle.WebApi.Controllers
             _context = context;
         }
 
+        
+
+
         // GET: api/Cars
         [HttpGet]
         public async Task<IActionResult> GetCars()
@@ -344,7 +347,44 @@ namespace Oracle.WebApi.Controllers
             memoryStream.Seek(0, SeekOrigin.Begin);
             return File(memoryStream.ToArray(), "application/pdf", $"car_{car.Id}.pdf");
         }
+        //reducir stock
+        [HttpPost("decrease-stock")] // Disminuir stock por ID, color y transmisión
+        public async Task<IActionResult> DecreaseStock([FromBody] StockUpdateRequest request)
+        {
+            var carDetail = await _context.CarDetails.FirstOrDefaultAsync(
+                x => x.CarId == request.Id && x.Color == request.Color && x.TransmissionType == request.Transmission);
 
+            if (carDetail == null)
+            {
+                return NotFound(new { Message = "Car detail not found." });
+            }
 
+            if (carDetail.Stock <= 0)
+            {
+                return BadRequest(new { Message = "Stock is already zero." });
+            }
+
+            carDetail.Stock -= 1;
+            _context.CarDetails.Update(carDetail);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Stock decreased successfully.", carDetail.Stock });
+        }
+    }
+
+    public class StockUpdateRequest
+    {
+        public decimal Id { get; set; }
+        public string Color { get; set; }
+        public string Transmission { get; set; }
     }
 }
+
+    
+
+
+
+
+
+
+
