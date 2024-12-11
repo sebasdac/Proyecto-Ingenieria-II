@@ -1,20 +1,45 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Inventario";
     Layout = "~/Views/Shared/_head_foot.cshtml";
 }
 <main>
     <div class="container-fluid px-4">
         <h1 class="mt-4">Inventarios</h1>
-       
 
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-table me-1"></i>
-                Stock de vehiculos
+                Stock de vehículos
             </div>
+
+            <form id="productForm">
+                <input type="hidden" id="productId" />
+                <label>ID CARRO:</label>
+                <input type="number" id="productCarId" required />
+                
+                <label>Modelo:</label>
+                <input type="text" id="productModel" required />
+                
+                <label>Año:</label>
+                <input type="number" id="productYear" required />
+
+                <label>Tipo de Transmisión:</label>
+                <input type="text" id="productTransmissionType" required />
+                
+                <label>Color:</label>
+                <input type="text" id="productColor" required />
+                
+                <label>Stock:</label>
+                <input type="number" id="productStock" required />
+                
+                <label>Precio:</label>
+                <input type="number" id="productPrice" step="0.01" required />
+                
+                <button type="submit" id="saveButton">Guardar</button>
+            </form>
+
             <div class="card-body" class="table-responsive">
-                <input id="searchInput" class="datatable-input" placeholder="Search..." type="search" title="Search within table" aria-controls="datatablesSimple">
+                <input id="searchInput" class="datatable-input" placeholder="Buscar..." type="search" title="Search within table" aria-controls="datatablesSimple">
                 <table id="datatablesSimple" class="table table-hover">
                     <thead>
                         <tr>
@@ -24,6 +49,7 @@
                             <th>COLOR</th>
                             <th>STOCK</th>
                             <th>PRECIO</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -36,6 +62,7 @@
                             <th>COLOR</th>
                             <th>STOCK</th>
                             <th>PRECIO</th>
+                            <th>Acciones</th>
                         </tr>
                     </tfoot>
                 </table>
@@ -44,121 +71,209 @@
     </div>
 </main>
 
-
 <script>
-    //preloaders
-    function showPreloader() {
-        document.getElementById('preloader').style.display = 'flex';
+  document.addEventListener("DOMContentLoaded", function () {
+    const table = document.getElementById("datatablesSimple");
+    const searchInput = document.getElementById("searchInput");
+    const form = document.getElementById("productForm");
+    const productId = document.getElementById("productId");
+    const productCarId = document.getElementById("productCarId");
+    const productModel = document.getElementById("productModel");
+    const productYear = document.getElementById("productYear");
+    const productTransmissionType = document.getElementById("productTransmissionType");
+    const productColor = document.getElementById("productColor");
+    const productStock = document.getElementById("productStock");
+    const productPrice = document.getElementById("productPrice");
+
+    if (!table) {
+        console.error("Table not found!");
+        return;
     }
 
-    function hidePreloader() {
-        const preloader = document.getElementById('preloader');
-        preloader.style.opacity = "0"; // Suaviza la desaparición
-        preloader.style.transition = "opacity 0.5s ease"; // Efecto de desvanecimiento
+    function fillTable(data) {
+        const tbody = table.querySelector('tbody');
+        tbody.innerHTML = '';
 
-        setTimeout(() => {
-            preloader.style.display = "none";
-        }, 500);
-    }
-    //fin preloaders
-    //mostrar preloader
-    showPreloader();
-    document.addEventListener("DOMContentLoaded", function () {
-        const table = document.getElementById("datatablesSimple");
-        const searchInput = document.getElementById("searchInput");
+        let lowStockWarning = false;
 
-        if (!table) {
-            console.error("Table not found!");
-            return;
-        }
+       
+        const carsArray = Array.isArray(data) ? data : (data.$values || []);
 
-
-        function fillTable(data) {
-            const tbody = table.querySelector('tbody');
-            tbody.innerHTML = '';
-
-            data.forEach(car => {
-                const details = car.carDetails?.$values || [];
-                details.forEach(detail => {
-                    const row = tbody.insertRow();
-                    row.innerHTML = `
-                                <td>${detail.id}</td>
-                                <td>${car.id}</td>
-                                <td>${detail.transmissionType || 'N/A'}</td>
-                                <td>${detail.color || 'N/A'}</td>
-                                <td>${detail.stock || '0'}</td>
-                                <td>${detail.price || '0.00'}</td>
-                            `;
-                });
-            });
-            //ocultar preloader
-            hidePreloader();
-        }
-
-        // Cargar todos los datos al inicio
-        fetch('https://localhost:7277/api/Car')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error ${response.status}`);
+        carsArray.forEach(car => {
+            const details = car.carDetails?.$values || car.carDetails || [];
+            details.forEach(detail => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${detail.id}</td>
+                    <td>${car.id}</td>
+                    <td>${detail.transmissionType || '-'}</td>
+                    <td>${detail.color || '-'}</td>
+                    <td>${detail.stock || '0'}</td>
+                    <td>${detail.price || '0'}</td>
+                    <td>
+                        <button class="editButton" data-id="${car.id}" data-detail-id="${detail.id}">Editar</button>
+                        <button class="deleteButton" data-id="${car.id}" data-detail-id="${detail.id}">Eliminar</button>
+                    </td>
+                `;
+                
+             
+                if (detail.stock < 2) {
+                    lowStockWarning = true;
                 }
-                return response.json();
-            })
+            });
+        });
+
+      
+        if (lowStockWarning) {
+            alert("¡Alerta! Hay productos con stock bajo (menos de 2 unidades).");
+        }
+    }
+
+    function loadProducts() {
+        fetch('https://localhost:7277/api/Car')
+            .then(response => response.json())
             .then(data => {
                 console.log("Datos iniciales recibidos:", data);
-                fillTable(data.$values || []);
+                fillTable(data);
             })
             .catch(error => {
                 console.error("Error al cargar los datos iniciales:", error);
                 alert("No se pudieron cargar los datos iniciales: " + error.message);
             });
+    }
+
+    form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        
+        const id = productId.value || 0;
+        const carId = productCarId.value;
+        const model = productModel.value;
+        const year = parseInt(productYear.value);
+        const transmissionType = productTransmissionType.value;
+        const color = productColor.value;
+        const stock = parseInt(productStock.value);
+        const price = parseFloat(productPrice.value);
+
+        const carDetails = [{
            
+            id: id ? parseInt(productId.dataset.detailId || 0) : 0,
+            carId: carId,
+            transmissionType: transmissionType,
+            color: color,
+            stock: stock,
+            price: price,
+        }];
+        
+        const method = id ? 'PUT' : 'POST';
+        const endpoint = id ? `https://localhost:7277/api/Car/${id}` : 'https://localhost:7277/api/Car';
 
+        try {
+            const payload = {
+                id: id ? parseInt(id) : 0,
+                model: model,
+                year: year,
+                carDetails: carDetails
+            };
 
-        searchInput.addEventListener("input", function () {
-            const filterValue = searchInput.value.trim();
+            const response = await fetch(endpoint, {
+                method,
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
 
-            if (filterValue === "") {
-
-                fetch('/api/Car')
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        fillTable(data.$values || []);
-                    })
-                    .catch(error => {
-                        console.error("Error al cargar todos los datos:", error);
-                        alert("No se pudieron cargar todos los datos: " + error.message);
-                    });
-            } else {
-                // Si hay un valor, buscar por ID
-
-                fetch(`https://localhost:7277/api/Car/${filterValue}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            if (response.status === 404) {
-                                // Si no se encuentra el ID, vaciar la tabla
-                                fillTable([]);
-                                return;
-                            }
-                            throw new Error(`HTTP error ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log("Datos filtrados por ID:", data);
-                        fillTable([data]);
-                    })
-                    .catch(error => {
-                        console.error("Error al filtrar por ID:", error);
-                        alert("No se pudo filtrar por ID: " + error.message);
-                    });
+            if (!response.ok) {
+              
+                const errorText = await response.text();
+                throw new Error(`Error HTTP ${response.status}: ${errorText}`);
             }
-        });
+
+            loadProducts();
+            form.reset();
+            
+            productId.dataset.detailId = '';
+        } catch (error) {
+            console.error("Error al guardar el producto:", error);
+            alert("No se pudo guardar el producto: " + error.message);
+        }
     });
 
+    searchInput.addEventListener("input", function () {
+        const filterValue = searchInput.value.trim();
 
+        if (filterValue === "") {
+            loadProducts();
+        } else {
+            fetch(`https://localhost:7277/api/Car/${filterValue}`)
+                .then(response => response.json())
+                .then(data => {
+                    fillTable([data]);
+                })
+                .catch(error => {
+                    console.error("Error al filtrar por ID:", error);
+                    alert("No se pudo filtrar por ID: " + error.message);
+                });
+        }
+    });
+
+    table.addEventListener('click', function (event) {
+        if (event.target.classList.contains('editButton')) {
+            const carId = event.target.dataset.id;
+            const detailId = event.target.dataset.detailId;
+
+                fetch(`https://localhost:7277/api/Car/${carId}`)
+                    .then(response => response.json())
+                    .then(car => {
+                        if (car.carDetails && typeof car.carDetails === 'object') {
+                            const detail = car.carDetails; 
+
+                            productId.dataset.detailId = detail.id || '';
+                            productId.value = car.id;
+                            productCarId.value = car.id;
+                            productModel.value = car.model;
+                            productYear.value = car.year;
+                            productTransmissionType.value = detail.transmissionType || 'N/A';
+                            productColor.value = detail.color || 'N/A';
+                            productStock.value = detail.stock || '0';
+                            productPrice.value = detail.price || '0.00';
+                        } else {
+                            alert("No se encontraron detalles para este carro o carDetails no es un objeto.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error al cargar datos para editar:", error);
+                        alert("No se pudieron cargar los datos para editar: " + error.message);
+                    });
+
+
+        }
+
+        if (event.target.classList.contains('deleteButton')) {
+            const carId = event.target.dataset.id;
+
+            if (confirm('Desea eliminar este carro?')) {
+                fetch(`https://localhost:7277/api/Car/${carId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        loadProducts();
+                    } else {
+                        alert("No se pudo eliminar el carro");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al eliminar el carro:", error);
+                    alert("No se pudo eliminar el carro: " + error.message);
+                });
+            }
+        }
+    });
+
+    loadProducts();
+});
 </script>
